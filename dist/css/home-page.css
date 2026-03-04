@@ -46,7 +46,7 @@ p {
 
 .navbar {
   padding: 0.5rem 1rem;
-  background-color: #e0e0e0;
+  background-color: #f4f4f4;
 }
 .navbar .navbar-nav {
   gap: 1.5rem;
@@ -60,13 +60,42 @@ p {
   gap: 0.5rem;
 }
 .navbar .navbar-nav .nav-link img {
-  width: 24px;
+  width: 14px;
 }
-.navbar .navbar-nav .nav-link .ms-Icon--Add, .navbar .navbar-nav .nav-link .ms-Icon--Upload, .navbar .navbar-nav .nav-link .ms-Icon--SyncToPC, .navbar .navbar-nav .nav-link .ms-Icon--Flow {
+.navbar .navbar-nav .nav-link .ms-Icon--Add,
+.navbar .navbar-nav .nav-link .ms-Icon--Upload,
+.navbar .navbar-nav .nav-link .ms-Icon--SyncToPC,
+.navbar .navbar-nav .nav-link .ms-Icon--Flow {
   color: #f25278;
 }
 .navbar .navbar-nav .nav-link .ms-Icon--ChevronDown {
   font-size: 12px;
+}
+@media screen and (max-width: 576px) {
+  .navbar {
+    padding: 0;
+  }
+  .navbar button {
+    margin: 0.5rem 1rem;
+  }
+  .navbar .navbar-collapse {
+    border-top: 1px solid #e0e0e0;
+  }
+  .navbar .navbar-nav {
+    gap: 0;
+  }
+  .navbar .navbar-nav:first-child {
+    margin-top: 0.5rem;
+  }
+  .navbar .navbar-nav .nav-item {
+    padding: 0.25rem 1rem;
+  }
+  .navbar .navbar-nav .nav-item:hover {
+    background-color: #cccccc;
+  }
+  .navbar .navbar-nav .nav-link .ms-Icon--ChevronDown {
+    font-size: 10px;
+  }
 }
 
 .table {
@@ -99,14 +128,72 @@ p {
   position: absolute;
   margin: -8px;
 }
-.table th img, .table td img {
+.table th img,
+.table td img {
   width: 24px;
 }
-.table th .ms-Icon--ChevronDown, .table td .ms-Icon--ChevronDown {
+.table th .ms-Icon--ChevronDown,
+.table td .ms-Icon--ChevronDown {
   margin-left: 0.5rem;
 }
-.table th .ms-Icon--Add, .table td .ms-Icon--Add {
+.table th .ms-Icon--Add,
+.table td .ms-Icon--Add {
   margin-right: 0.5rem;
+}
+@media screen and (max-width: 576px) {
+  .table tbody,
+  .table tr {
+    display: block;
+  }
+  .table thead {
+    display: none;
+  }
+  .table tbody tr {
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+  }
+  .table tbody tr td {
+    display: flex;
+    padding: 0.5rem;
+    border: none;
+    align-items: center;
+  }
+  .table tbody tr td:before {
+    display: inline-block;
+    min-width: 110px;
+    margin-right: 0.5rem;
+    color: #7a7a7a;
+    font-style: italic;
+    font-weight: 600;
+    content: "";
+  }
+  .table tbody tr td:nth-child(1) {
+    background-color: #f4f4f4;
+  }
+  .table tbody tr td:nth-child(5) {
+    display: none;
+  }
+  .table tbody tr td:nth-child(1)::before {
+    content: "File Type";
+  }
+  .table tbody tr td:nth-child(2)::before {
+    content: "Name";
+  }
+  .table tbody tr td:nth-child(3)::before {
+    content: "Modified";
+  }
+  .table tbody tr td:nth-child(4)::before {
+    content: "Modified By";
+  }
+  .table tbody tr td img {
+    margin-left: auto;
+  }
+  .table tbody tr .ms-Icon--Glimmer {
+    position: static;
+    margin: 0 0.25rem 0 0;
+    align-self: center;
+  }
 }
 
 .container-fluid {

@@ -24,7 +24,8 @@
         border: none;
         color: $text-color;
 
-        &:nth-child(3), &:nth-child(4) {
+        &:nth-child(3),
+        &:nth-child(4) {
           color: $text-light;
           font-size: $font-size-sm;
         }
@@ -39,7 +40,8 @@
     }
   }
 
-  th, td {
+  th,
+  td {
     img {
       width: $icon-width;
     }
@@ -50,6 +52,77 @@
 
     .ms-Icon--Add {
       margin-right: $spacing-sm;
+    }
+  }
+
+  @media screen and (max-width: 576px) {
+
+    tbody,
+    tr {
+      display: block;
+    }
+
+    thead {
+      display: none;
+    }
+
+    tbody {
+      tr {
+        border: 1px solid $border-color;
+        border-radius: $border-radius;
+        margin-bottom: $spacing-md;
+
+        td {
+          display: flex;
+          padding: $spacing-sm;
+          border: none;
+          align-items: center;
+
+          &:before {
+            display: inline-block;
+            min-width: 110px;
+            margin-right: $spacing-sm;
+            color: $text-light;
+            font-style: italic;
+            font-weight: 600;
+            content: "";
+          }
+
+          &:nth-child(1) {
+            background-color: $navbar-color;
+          }
+
+          &:nth-child(5) {
+            display: none;
+          }
+
+          &:nth-child(1)::before {
+            content: "File Type";
+          }
+
+          &:nth-child(2)::before {
+            content: "Name";
+          }
+
+          &:nth-child(3)::before {
+            content: "Modified";
+          }
+
+          &:nth-child(4)::before {
+            content: "Modified By";
+          }
+
+          img {
+            margin-left: auto;
+          }
+        }
+
+        .ms-Icon--Glimmer {
+          position: static;
+          margin: 0 $spacing-xs 0 0;
+          align-self: center;
+        }
+      }
     }
   }
 }
