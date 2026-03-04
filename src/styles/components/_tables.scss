@@ -1,0 +1,55 @@
+// Table Styles
+@import '../utilities/variables';
+
+.table {
+  font-size: $font-size-base;
+  color: $text-color;
+  border-collapse: collapse;
+
+  thead {
+    border-bottom: 2px solid $border-color;
+
+    th {
+      font-size: $font-size-sm;
+      font-weight: normal;
+    }
+  }
+
+  tbody {
+    tr {
+      border-bottom: 1px solid $border-color;
+
+      td {
+        vertical-align: middle;
+        border: none;
+        color: $text-color;
+
+        &:nth-child(3), &:nth-child(4) {
+          color: $text-light;
+          font-size: $font-size-sm;
+        }
+      }
+
+      .ms-Icon--Glimmer {
+        color: $secondary-color;
+        font-size: 10px;
+        position: absolute;
+        margin: -8px;
+      }
+    }
+  }
+
+  th, td {
+    img {
+      width: $icon-width;
+    }
+
+    .ms-Icon--ChevronDown {
+      margin-left: $spacing-sm;
+    }
+
+    .ms-Icon--Add {
+      margin-right: $spacing-sm;
+    }
+  }
+}

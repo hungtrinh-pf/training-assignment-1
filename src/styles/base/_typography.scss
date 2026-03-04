@@ -1,1 +1,24 @@
 // Typography Rules
+@import '../utilities/variables';
+
+body {
+  font-size: $font-size-base;
+  color: $text-color;
+  line-height: 1.5;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  font-weight: 300;
+  color: $text-color;
+}
+
+h2 {
+  font-size: $font-size-heading;
+  margin-bottom: $spacing-lg;
+  color: #5a5a5a;
+}
+
+p {
+  margin: 0 0 $spacing-md 0;
+}

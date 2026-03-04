@@ -1,1 +1,32 @@
 // Navigation styles
+@import '../utilities/variables';
+
+.navbar {
+  padding: $spacing-sm $spacing-md;
+  background-color: $navbar-color;
+  
+  .navbar-nav {
+    gap: $spacing-lg;
+  
+    .nav-link {
+      color: $text-color;
+      padding: 0;
+      font-size: $font-size-base;
+      display: flex;
+      align-items: center;
+      gap: $spacing-sm;
+  
+      img {
+        width: $icon-width;
+      }
+  
+      .ms-Icon--Add, .ms-Icon--Upload, .ms-Icon--SyncToPC, .ms-Icon--Flow {
+        color: $secondary-color;
+      }
+  
+      .ms-Icon--ChevronDown {
+        font-size: $font-size-sm;
+      }
+    }
+  }
+}
