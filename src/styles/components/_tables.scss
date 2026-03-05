@@ -1,9 +1,10 @@
 // Table Styles
+@import '../utilities/mixins';
 @import '../utilities/variables';
 
 .table {
   thead {
-    border-bottom: 2px solid $border-color;
+    @include border(bottom, 2px);
 
     th {
       font-size: $font-size-sm;
@@ -13,7 +14,7 @@
 
   tbody {
     tr {
-      border-bottom: 1px solid $border-color;
+      @include border(bottom, 1px);
 
       td {
         vertical-align: middle;
@@ -50,6 +51,7 @@
   }
 
   @media screen and (max-width: 576px) {
+
     tbody,
     tr {
       display: block;
@@ -86,21 +88,10 @@
             display: none;
           }
 
-          &:nth-child(1)::before {
-            content: "File Type";
-          }
-
-          &:nth-child(2)::before {
-            content: "Name";
-          }
-
-          &:nth-child(3)::before {
-            content: "Modified";
-          }
-
-          &:nth-child(4)::before {
-            content: "Modified By";
-          }
+          @include card-row-header(1, "File Type");
+          @include card-row-header(2, "Name");
+          @include card-row-header(3, "Modified");
+          @include card-row-header(4, "Modified By");
 
           img {
             margin-left: auto;

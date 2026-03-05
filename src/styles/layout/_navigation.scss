@@ -1,4 +1,5 @@
 // Navigation styles
+@import '../utilities/mixins';
 @import '../utilities/variables';
 
 .navbar {
@@ -39,7 +40,7 @@
     }
 
     .navbar-collapse {
-      border-top: 1px solid $border-color;
+      @include border(top, 1px);
     }
 
     .navbar-nav {
