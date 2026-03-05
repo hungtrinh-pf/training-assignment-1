@@ -2,10 +2,6 @@
 @import '../utilities/variables';
 
 .table {
-  font-size: $font-size-base;
-  color: $text-color;
-  border-collapse: collapse;
-
   thead {
     border-bottom: 2px solid $border-color;
 
@@ -21,8 +17,6 @@
 
       td {
         vertical-align: middle;
-        border: none;
-        color: $text-color;
 
         &:nth-child(3),
         &:nth-child(4) {
@@ -33,9 +27,9 @@
 
       .ms-Icon--Glimmer {
         color: $secondary-color;
-        font-size: 10px;
+        font-size: $font-size-xs;
         position: absolute;
-        margin: -8px;
+        margin: -$spacing-sm;
       }
     }
   }
@@ -78,13 +72,10 @@
           align-items: center;
 
           &:before {
-            display: inline-block;
             min-width: 110px;
-            margin-right: $spacing-sm;
             color: $text-light;
             font-style: italic;
             font-weight: 600;
-            content: "";
           }
 
           &:nth-child(1) {
@@ -117,9 +108,8 @@
         }
 
         .ms-Icon--Glimmer {
-          position: static;
-          margin: 0 $spacing-xs 0 0;
-          align-self: center;
+          position: relative;
+          margin: -$spacing-md 0 0 0;
         }
       }
     }
