@@ -1,8 +1,8 @@
 // Define mixins
 @import '../utilities/variables';
 
-@mixin border($top-or-bottom, $width) {
-    border-#{$top-or-bottom}: #{$width} solid $border-color;
+@mixin border($position, $width) {
+    border-#{$position}: #{$width} solid $border-color;
 }
 
 @mixin card-row-header($index, $content) {

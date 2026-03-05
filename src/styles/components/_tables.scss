@@ -24,6 +24,10 @@
           color: $text-light;
           font-size: $font-size-sm;
         }
+
+        &:nth-child(4) {
+          border-bottom: 0;
+        }
       }
 
       .ms-Icon--Glimmer {
@@ -64,17 +68,15 @@
     tbody {
       tr {
         border: 1px solid $border-color;
-        border-radius: $border-radius;
         margin-bottom: $spacing-md;
 
         td {
           display: flex;
           padding: $spacing-sm;
-          border: none;
           align-items: center;
 
           &:before {
-            min-width: 110px;
+            min-width: 100px;
             color: $text-light;
             font-style: italic;
             font-weight: 600;
