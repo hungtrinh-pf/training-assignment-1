@@ -45,11 +45,12 @@ h2 {
 .navbar .navbar-nav .nav-link {
   padding: 0;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: 0.5rem;
 }
 .navbar .navbar-nav .nav-link img {
   width: 14px;
+  align-self: center;
 }
 .navbar .navbar-nav .nav-link .ms-Icon--Add,
 .navbar .navbar-nav .nav-link .ms-Icon--Upload,
@@ -107,16 +108,22 @@ h2 {
   position: absolute;
   margin: -0.5rem;
 }
+.table th i,
+.table td i {
+  font-size: 16px;
+}
 .table th img,
 .table td img {
-  width: 24px;
+  width: 18px;
 }
 .table th .ms-Icon--ChevronDown,
 .table td .ms-Icon--ChevronDown {
+  font-size: 12px;
   margin-left: 0.5rem;
 }
 .table th .ms-Icon--Add,
 .table td .ms-Icon--Add {
+  font-size: 12px;
   margin-right: 0.5rem;
 }
 @media screen and (max-width: 576px) {
@@ -160,7 +167,7 @@ h2 {
   .table tbody tr td:nth-child(4)::before {
     content: "Modified By";
   }
-  .table tbody tr td img {
+  .table tbody tr td i, .table tbody tr td img {
     margin-left: auto;
   }
   .table tbody tr .ms-Icon--Glimmer {

@@ -12,11 +12,12 @@
     .nav-link {
       padding: 0;
       display: flex;
-      align-items: center;
+      align-items: flex-end;
       gap: $spacing-sm;
 
       img {
         width: $icon-width-navbar;
+        align-self: center;
       }
 
       .ms-Icon--Add,
