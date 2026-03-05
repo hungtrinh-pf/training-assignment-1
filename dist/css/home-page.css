@@ -118,12 +118,12 @@ h2 {
 }
 .table th .ms-Icon--ChevronDown,
 .table td .ms-Icon--ChevronDown {
-  font-size: 12px;
-  margin-left: 0.5rem;
+  font-size: 10px;
+  margin-left: 0.25rem;
 }
 .table th .ms-Icon--Add,
 .table td .ms-Icon--Add {
-  font-size: 12px;
+  font-size: 10px;
   margin-right: 0.5rem;
 }
 @media screen and (max-width: 576px) {
