@@ -9,17 +9,24 @@ $navbar-color: #f4f4f4;
 $navbar-hover-color: #cccccc;
 $border-color: #e0e0e0;
 
-$spacing-xs: 0.25rem;
-$spacing-sm: 0.5rem;
-$spacing-md: 1rem;
-$spacing-lg: 1.5rem;
-$spacing-xl: 2rem;
+$spacing-scale: (
+    none: 0,
+    xs: 0.25,
+    sm: 0.5,
+    md: 1,
+    lg: 1.5,
+    xl: 2,
+    xxl: 2.5
+);
 
-$font-size-base: 14px;
-$font-size-xs: 10px;
-$font-size-sm: 12px;
-$font-size-lg: 16px;
-$font-size-heading: 28px;
+$font-size-scale: (
+    xs: 10px,
+    sm: 12px,
+    base: 14px,
+    lg: 16px,
+    xl: 20px,
+    xxl: 28px
+);
 
 $border-radius: 4px;
 

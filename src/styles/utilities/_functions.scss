@@ -1,1 +1,23 @@
 // Define functions
+@use "sass:map";
+@import '../utilities/variables';
+
+@function spacing($key, $multiplier: 1rem) {
+    $value: map.get($spacing-scale, $key);
+
+    @if $value == null {
+        @error "Unknown spacer key `#{$key}`";
+    }
+
+    @return $value * $multiplier;
+}
+
+@function font-size($key) {
+    $value: map.get($font-size-scale, $key);
+
+    @if $value == null {
+        @error "Unknown font size key `#{$key}`";
+    }
+
+    @return $value;
+}

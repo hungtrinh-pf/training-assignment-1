@@ -1,8 +1,8 @@
 // Home page styles
 @import "master-page";
+@import '../utilities/functions';
 @import '../utilities/variables';
 
 .container-fluid {
-  padding-left: $spacing-lg;
-  padding-right: $spacing-lg;
+  padding: 0 spacing(lg);
 }

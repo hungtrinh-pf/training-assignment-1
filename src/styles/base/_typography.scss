@@ -1,8 +1,9 @@
 // Typography Rules
+@import '../utilities/functions';
 @import '../utilities/variables';
 
 body {
-  font-size: $font-size-base;
+  font-size: font-size(base);
   color: $text-color;
   line-height: 1.5;
 }
@@ -14,6 +15,6 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 h2 {
-  font-size: $font-size-heading;
-  margin-bottom: $spacing-lg;
+  font-size: font-size(xxl);
+  margin-bottom: spacing(lg);
 }
