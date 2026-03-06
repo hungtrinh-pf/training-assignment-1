@@ -88,11 +88,11 @@
             font-weight: 600;
           }
 
-          &:nth-child(1) {
+          &:first-child {
             background-color: $navbar-color;
           }
 
-          &:nth-child(5) {
+          &:last-child {
             display: none;
           }
 
@@ -101,7 +101,8 @@
           @include card-row-header(3, "Modified");
           @include card-row-header(4, "Modified By");
 
-          i, img {
+          i,
+          img {
             margin-left: auto;
           }
         }
