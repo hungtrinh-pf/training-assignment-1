@@ -1,7 +1,7 @@
 export interface FileItem {
     id: string;
     name: string;
-    extension: string;
+    type: string;
     createdAt: number;
     createdBy: string;
     modifiedAt: number;

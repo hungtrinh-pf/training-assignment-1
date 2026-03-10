@@ -95,11 +95,11 @@ h2 {
 .table tbody tr td {
   vertical-align: middle;
 }
-.table tbody tr td:nth-child(3), .table tbody tr td:nth-child(4) {
+.table tbody tr td:nth-child(4), .table tbody tr td:nth-child(5) {
   color: #7a7a7a;
   font-size: 12px;
 }
-.table tbody tr td:nth-child(4) {
+.table tbody tr td:nth-child(5) {
   border-bottom: 0;
 }
 .table tbody tr .ms-Icon--Glimmer {
@@ -150,21 +150,24 @@ h2 {
     font-weight: 600;
   }
   .table tbody tr td:first-child {
-    background-color: #f4f4f4;
-  }
-  .table tbody tr td:last-child {
     display: none;
   }
-  .table tbody tr td:nth-child(1)::before {
-    content: "File Type";
+  .table tbody tr td:nth-child(2) {
+    background-color: #f4f4f4;
+  }
+  .table tbody tr td:last-child, .table tbody tr td:nth-last-child(2) {
+    display: none;
   }
   .table tbody tr td:nth-child(2)::before {
-    content: "Name";
+    content: "File Type";
   }
   .table tbody tr td:nth-child(3)::before {
-    content: "Modified";
+    content: "Name";
   }
   .table tbody tr td:nth-child(4)::before {
+    content: "Modified";
+  }
+  .table tbody tr td:nth-child(5)::before {
     content: "Modified By";
   }
   .table tbody tr td i,

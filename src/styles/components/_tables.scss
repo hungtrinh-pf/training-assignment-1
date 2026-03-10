@@ -20,17 +20,17 @@
       td {
         vertical-align: middle;
 
-        &:nth-child(3),
-        &:nth-child(4) {
+        &:nth-child(4),
+        &:nth-child(5) {
           color: $text-light;
           font-size: font-size(sm);
         }
 
-        &:nth-child(4) {
+        &:nth-child(5) {
           border-bottom: 0;
         }
       }
-      
+
       .ms-Icon--Glimmer {
         color: $secondary-color;
         font-size: font-size(xs);
@@ -90,17 +90,22 @@
           }
 
           &:first-child {
-            background-color: $navbar-color;
-          }
-
-          &:last-child {
             display: none;
           }
 
-          @include card-row-header(1, "File Type");
-          @include card-row-header(2, "Name");
-          @include card-row-header(3, "Modified");
-          @include card-row-header(4, "Modified By");
+          &:nth-child(2) {
+            background-color: $navbar-color;
+          }
+
+          &:last-child,
+          &:nth-last-child(2) {
+            display: none;
+          }
+
+          @include card-row-header(2, "File Type");
+          @include card-row-header(3, "Name");
+          @include card-row-header(4, "Modified");
+          @include card-row-header(5, "Modified By");
 
           i,
           img {
