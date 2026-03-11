@@ -1,7 +1,7 @@
 import renderGrid from '../components/_grid';
 import { folderStorage } from '../services/storage';
-import ready from '../utilities/_helper';
-import { getCurrentFolderId, hasInvalidChars } from '../utilities/_methods';
+import { ready } from '../utilities/_helper';
+import { getCurrentFolderId, hasInvalidChars } from '../utilities/_helper';
 
 const renderCurrentFolder = () => {
   renderGrid(getCurrentFolderId());

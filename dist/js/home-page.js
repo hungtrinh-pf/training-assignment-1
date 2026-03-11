@@ -11,7 +11,7 @@
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../constants */ "./src/scripts/constants/index.ts");
 /* harmony import */ var _services_storage__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../services/storage */ "./src/scripts/services/storage.ts");
-/* harmony import */ var _utilities_methods__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../utilities/_methods */ "./src/scripts/utilities/_methods.ts");
+/* harmony import */ var _utilities_helper__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../utilities/_helper */ "./src/scripts/utilities/_helper.ts");
 
 
 
@@ -122,7 +122,7 @@ const initRowSelection = (row) => {
     });
 };
 const createFolderRow = (folder) => {
-    const currentFolderId = (0,_utilities_methods__WEBPACK_IMPORTED_MODULE_2__.getCurrentFolderId)();
+    const currentFolderId = (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_2__.getCurrentFolderId)();
     const row = document.createElement('tr');
     row.innerHTML = `
       <td class="row-select-cell">
@@ -145,7 +145,7 @@ const createFolderRow = (folder) => {
         const newName = prompt("Rename folder", folder.name);
         if (!newName || !newName.trim())
             return;
-        if ((0,_utilities_methods__WEBPACK_IMPORTED_MODULE_2__.hasInvalidChars)(newName)) {
+        if ((0,_utilities_helper__WEBPACK_IMPORTED_MODULE_2__.hasInvalidChars)(newName)) {
             alert("Error: Folder name contains an invalid character: \\ / : * ? \" < > |");
             return;
         }
@@ -193,7 +193,7 @@ const createFileRow = (file) => {
         const newName = prompt("Rename file", file.name);
         if (!newName.trim())
             return;
-        if ((0,_utilities_methods__WEBPACK_IMPORTED_MODULE_2__.hasInvalidChars)(newName)) {
+        if ((0,_utilities_helper__WEBPACK_IMPORTED_MODULE_2__.hasInvalidChars)(newName)) {
             alert("Error: File name contains an invalid character: \\ / : * ? \" < > |");
             return;
         }
@@ -203,7 +203,7 @@ const createFileRow = (file) => {
             createdBy: "You",
             modifiedBy: "You",
         };
-        const folderId = (0,_utilities_methods__WEBPACK_IMPORTED_MODULE_2__.getCurrentFolderId)();
+        const folderId = (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_2__.getCurrentFolderId)();
         _services_storage__WEBPACK_IMPORTED_MODULE_1__.folderStorage.updateFile(folderId, file.id, newFile);
         renderGrid(folderId);
     });
@@ -211,7 +211,7 @@ const createFileRow = (file) => {
         e.preventDefault();
         if (!confirm(`Delete file "${file.name}"?`))
             return;
-        const folderId = (0,_utilities_methods__WEBPACK_IMPORTED_MODULE_2__.getCurrentFolderId)();
+        const folderId = (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_2__.getCurrentFolderId)();
         _services_storage__WEBPACK_IMPORTED_MODULE_1__.folderStorage.deleteFile(folderId, file.id);
         renderGrid(folderId);
     });
@@ -488,6 +488,11 @@ const folderStorage = {
 /***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   getCurrentFolderId: function() { return /* binding */ getCurrentFolderId; },
+/* harmony export */   hasInvalidChars: function() { return /* binding */ hasInvalidChars; },
+/* harmony export */   ready: function() { return /* binding */ ready; }
+/* harmony export */ });
 const ready = (fn) => {
     if (document.readyState !== 'loading') {
         fn();
@@ -496,22 +501,6 @@ const ready = (fn) => {
         document.addEventListener('DOMContentLoaded', fn);
     }
 };
-/* harmony default export */ __webpack_exports__["default"] = (ready);
-
-
-/***/ }),
-
-/***/ "./src/scripts/utilities/_methods.ts":
-/*!*******************************************!*\
-  !*** ./src/scripts/utilities/_methods.ts ***!
-  \*******************************************/
-/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   getCurrentFolderId: function() { return /* binding */ getCurrentFolderId; },
-/* harmony export */   hasInvalidChars: function() { return /* binding */ hasInvalidChars; }
-/* harmony export */ });
 const hasInvalidChars = (str) => {
     const invalid = ["\\", "/", ":", "*", "?", "\"", "<", ">", "|"];
     return invalid.some(char => str.includes(char));
@@ -597,20 +586,19 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _components_grid__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../components/_grid */ "./src/scripts/components/_grid.ts");
 /* harmony import */ var _services_storage__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../services/storage */ "./src/scripts/services/storage.ts");
 /* harmony import */ var _utilities_helper__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../utilities/_helper */ "./src/scripts/utilities/_helper.ts");
-/* harmony import */ var _utilities_methods__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../utilities/_methods */ "./src/scripts/utilities/_methods.ts");
 
 
 
 
 const renderCurrentFolder = () => {
-    (0,_components_grid__WEBPACK_IMPORTED_MODULE_0__["default"])((0,_utilities_methods__WEBPACK_IMPORTED_MODULE_3__.getCurrentFolderId)());
+    (0,_components_grid__WEBPACK_IMPORTED_MODULE_0__["default"])((0,_utilities_helper__WEBPACK_IMPORTED_MODULE_2__.getCurrentFolderId)());
 };
 const createNewFolder = () => {
-    const currentFolderId = (0,_utilities_methods__WEBPACK_IMPORTED_MODULE_3__.getCurrentFolderId)();
+    const currentFolderId = (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_2__.getCurrentFolderId)();
     const folderName = prompt("Folder name", "New folder");
     if (!folderName || !folderName.trim())
         return;
-    if ((0,_utilities_methods__WEBPACK_IMPORTED_MODULE_3__.hasInvalidChars)(folderName)) {
+    if ((0,_utilities_helper__WEBPACK_IMPORTED_MODULE_2__.hasInvalidChars)(folderName)) {
         alert("Error: Folder name contains an invalid character: \\ / : * ? \" < > |");
         return;
     }
@@ -623,7 +611,7 @@ const createNewFolder = () => {
     }, currentFolderId);
     renderCurrentFolder();
 };
-(0,_utilities_helper__WEBPACK_IMPORTED_MODULE_2__["default"])(() => {
+(0,_utilities_helper__WEBPACK_IMPORTED_MODULE_2__.ready)(() => {
     const rootFolder = _services_storage__WEBPACK_IMPORTED_MODULE_1__.folderStorage.folders[0];
     if (!rootFolder || rootFolder.subFolders.length + rootFolder.files.length === 0) {
         _services_storage__WEBPACK_IMPORTED_MODULE_1__.folderStorage.seed();
@@ -645,7 +633,7 @@ const createNewFolder = () => {
         const files = e.target.files;
         if (files.length === 0)
             return;
-        const currentFolderId = (0,_utilities_methods__WEBPACK_IMPORTED_MODULE_3__.getCurrentFolderId)();
+        const currentFolderId = (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_2__.getCurrentFolderId)();
         for (const file of files) {
             const fileMeta = {
                 name: file.name,

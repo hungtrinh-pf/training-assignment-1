@@ -2,7 +2,7 @@ import { FILE_EXT_MAP } from "../constants";
 import { FileItem } from "../models/file";
 import { FolderItem } from "../models/folder";
 import { folderStorage } from "../services/storage";
-import { getCurrentFolderId, hasInvalidChars } from "../utilities/_methods";
+import { getCurrentFolderId, hasInvalidChars } from "../utilities/_helper";
 
 const delay = (ms = 250) => new Promise<void>(resolve => setTimeout(resolve, ms));
 

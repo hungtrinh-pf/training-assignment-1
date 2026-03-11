@@ -1,4 +1,4 @@
-const ready = (fn: ()=> void) => {
+export const ready = (fn: () => void) => {
   if (document.readyState !== 'loading') {
     fn();
   } else {
@@ -6,4 +6,12 @@ const ready = (fn: ()=> void) => {
   }
 };
 
-export default ready;
+export const hasInvalidChars = (str: string) => {
+  const invalid = ["\\", "/", ":", "*", "?", "\"", "<", ">", "|"];
+  return invalid.some(char => str.includes(char));
+};
+
+export const getCurrentFolderId = (): string => {
+  const match = window.location.hash.match(/^#\/folder\/([^/]+)/);
+  return match ? match[1] : "root";
+};
