@@ -89,6 +89,8 @@ const renderGrid = async (folderId?: string) => {
     h2.innerHTML = currentFolder.name;
     folders = currentFolder.subFolders;
     files = currentFolder.files;
+  } else if (folderId && !currentFolder) {
+    h2.innerHTML = "Folder not found";
   } else {
     h2.innerHTML = "Documents";
     folders = folderStorage.folders;
