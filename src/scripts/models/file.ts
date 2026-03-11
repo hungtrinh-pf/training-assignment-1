@@ -6,4 +6,6 @@ export interface FileItem {
     createdBy: string;
     modifiedAt: number;
     modifiedBy: string;
-}
+};
+
+export type FileCreateUpdateDto = Omit<FileItem, 'id' | 'createdAt' | 'modifiedAt'>;

@@ -1,21 +1,30 @@
 import renderGrid from '../components/_grid';
-import { folderStorage, rootFileStorage } from '../services/storage';
+import { folderStorage } from '../services/storage';
 import ready from '../utilities/_helper';
 
-const getCurrentFolderId = (): string | undefined => {
+const hasInvalidChars = (str: string) => {
+  const invalid = ["\\", "/", ":", "*", "?", "\"", "<", ">", "|"];
+  return invalid.some(char => str.includes(char));
+};
+
+const getCurrentFolderId = (): string => {
   const match = window.location.hash.match(/^#\/folder\/([^/]+)/);
-  return match ? match[1] : undefined;
-}
+  return match ? match[1] : "root";
+};
 
 const renderCurrentFolder = async () => {
   renderGrid(getCurrentFolderId());
-}
+};
 
 const createNewFolder = () => {
   const currentFolderId = getCurrentFolderId();
 
   const folderName = prompt("Folder name", "New folder");
   if (!folderName || !folderName.trim()) return;
+  if (hasInvalidChars(folderName)) {
+    alert("Error: Folder name contains an invalid character: \\ / : * ? \" < > |");
+    return;
+  }
 
   folderStorage.createFolder({
     name: folderName.trim(),
@@ -29,10 +38,8 @@ const createNewFolder = () => {
 };
 
 ready(async () => {
-  if (rootFileStorage.rootFiles.length === 0) {
-    rootFileStorage.seed();
-  }
-  if (folderStorage.folders.length === 0) {
+  const rootFolder = folderStorage.folders[0];
+  if (!rootFolder || rootFolder.subFolders.length + rootFolder.files.length === 0) {
     folderStorage.seed();
   }
 
@@ -56,7 +63,6 @@ ready(async () => {
     if (files.length === 0) return;
 
     const currentFolderId = getCurrentFolderId();
-
     for (const file of files) {
       const fileMeta = {
         name: file.name,
@@ -64,14 +70,8 @@ ready(async () => {
         createdBy: "You",
         modifiedBy: "You",
       };
-  
-      if (currentFolderId) {
-        folderStorage.createFile(currentFolderId, fileMeta);
-      } else {
-        rootFileStorage.createRootFile(fileMeta);
-      }
+      folderStorage.createFile(currentFolderId, fileMeta);
     }
-
     renderCurrentFolder();
   });
 });

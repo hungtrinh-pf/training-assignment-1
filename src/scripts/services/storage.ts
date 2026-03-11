@@ -1,11 +1,6 @@
-import {
-    ROOT_FILE_STORAGE_KEY,
-    FOLDER_STORAGE_KEY,
-    SEED_FILES,
-    SEED_FOLDERS
-} from "../constants";
-import { FileItem } from "../models/file";
-import { FolderItem } from "../models/folder";
+import { FOLDER_STORAGE_KEY, SEED_DATA } from "../constants";
+import { FileCreateUpdateDto, FileItem } from "../models/file";
+import { FolderItem, FolderCreateDto, FolderUpdateDto } from "../models/folder";
 
 const safeParse = <T>(value: string | null, fallback: T): T => {
     if (!value) return fallback;
@@ -20,17 +15,9 @@ const generateId = () => {
     return crypto.randomUUID();
 };
 
-const loadFiles = (): FileItem[] => {
-    return safeParse<FileItem[]>(localStorage.getItem(ROOT_FILE_STORAGE_KEY), []);
-}
-
 const loadFolders = (): FolderItem[] => {
     return safeParse<FolderItem[]>(localStorage.getItem(FOLDER_STORAGE_KEY), []);
 };
-
-const saveFiles = (files: FileItem[]) => {
-    localStorage.setItem(ROOT_FILE_STORAGE_KEY, JSON.stringify(files));
-}
 
 const saveFolders = (folders: FolderItem[]) => {
     localStorage.setItem(FOLDER_STORAGE_KEY, JSON.stringify(folders));
@@ -48,55 +35,10 @@ const walkFolders = (
     return false;
 };
 
-export const rootFileStorage = {
-    get rootFiles(): FileItem[] {
-        return loadFiles();
-    },
-
-    seed: () => {
-        saveFiles(SEED_FILES);
-    },
-
-    createRootFile: (data: Omit<FileItem, 'id' | 'createdAt' | 'modifiedAt'>): FileItem => {
-        const files = loadFiles();
-        const newFile: FileItem = {
-            ...data,
-            id: generateId(),
-            createdAt: Date.now(),
-            modifiedAt: Date.now(),
-        };
-        files.push(newFile);
-        saveFiles(files);
-        return newFile;
-    },
-
-    updateRootFile: (fileId: string, data: Partial<Omit<FileItem, 'id' | 'createdAt'>>): FileItem | undefined => {
-        const files = loadFiles();
-        const fileIndex = files.findIndex(f => f.id === fileId);
-        if (fileIndex === -1) return undefined;
-
-        files[fileIndex] = { ...files[fileIndex], ...data, modifiedAt: Date.now() };
-        saveFiles(files);
-        return files[fileIndex];
-    },
-
-    deleteRootFile: (fileId: string): boolean => {
-        const files = loadFiles();
-        const newFiles = files.filter(f => f.id !== fileId);
-        if (newFiles.length === files.length) return false;
-        saveFiles(newFiles);
-        return true;
-    },
-};
-
 export const folderStorage = {
-    get folders(): FolderItem[] {
-        return loadFolders();
-    },
+    get folders(): FolderItem[] { return loadFolders(); },
 
-    seed: () => {
-        saveFolders(SEED_FOLDERS);
-    },
+    seed: () => saveFolders([SEED_DATA]),
 
     getFolderById: (folderId: string): FolderItem | undefined => {
         const folders = loadFolders();
@@ -109,28 +51,8 @@ export const folderStorage = {
         return undefined;
     },
 
-    createFolder: (
-        data: Omit<FolderItem, 'id' | 'createdAt' | 'modifiedAt'>,
-        parentId?: string,
-    ): FolderItem | undefined => {
+    createFolder: (data: FolderCreateDto, parentId?: string): FolderItem | undefined => {
         const folders = loadFolders();
-        if (!parentId) {
-            if (folders.some(folder => folder.name === data.name)) {
-                alert(`A folder with name "${data.name}" already exists.`);
-                return;
-            }
-
-            const newFolder: FolderItem = {
-                id: generateId(),
-                createdAt: Date.now(),
-                modifiedAt: Date.now(),
-                ...data,
-            };
-            folders.push(newFolder);
-            saveFolders(folders);
-            return newFolder;
-        }
-
         let createdFolder;
 
         walkFolders(folders, (folder) => {
@@ -157,7 +79,7 @@ export const folderStorage = {
         return createdFolder;
     },
 
-    updateFolder: (folderId: string, data: Partial<Omit<FolderItem, 'id' | 'createdAt'>>): FolderItem | undefined => {
+    updateFolder: (folderId: string, data: FolderUpdateDto): FolderItem | undefined => {
         const folders = loadFolders();
         let updatedFolder;
 
@@ -192,10 +114,8 @@ export const folderStorage = {
         return deleted;
     },
 
-    createFile: (folderId: string, data: Omit<FileItem, 'id' | 'createdAt' | 'modifiedAt'>): FileItem | undefined => {
-        if (!folderId) return undefined;
+    createFile: (folderId: string, data: FileCreateUpdateDto): FileItem | undefined => {
         const folders = loadFolders();
-
         let createdFile;
 
         walkFolders(folders, (folder) => {
@@ -217,7 +137,7 @@ export const folderStorage = {
         return createdFile;
     },
 
-    updateFile: (folderId: string, fileId: string, data: Omit<FileItem, 'id' | 'createdAt' | 'modifiedAt'>): FileItem | undefined => {
+    updateFile: (folderId: string, fileId: string, data: FileCreateUpdateDto): FileItem | undefined => {
         const folders = loadFolders();
         let updatedFile;
 

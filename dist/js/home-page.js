@@ -19,7 +19,11 @@ const showSpinner = () => spinner?.classList.remove("d-none");
 const hideSpinner = () => spinner?.classList.add("d-none");
 const getCurrentFolderId = () => {
     const match = window.location.hash.match(/^#\/folder\/([^/]+)/);
-    return match ? match[1] : undefined;
+    return match ? match[1] : "root";
+};
+const hasInvalidChars = (str) => {
+    const invalid = ["\\", "/", ":", "*", "?", "\"", "<", ">", "|"];
+    return invalid.some(char => str.includes(char));
 };
 const getFolderPath = (folderId) => {
     if (!folderId)
@@ -42,7 +46,7 @@ const getFolderPath = (folderId) => {
 };
 const renderBreadcrumb = (folderId) => {
     const breadcrumb = document.querySelector('.breadcrumb');
-    if (!folderId) {
+    if (folderId === "root") {
         breadcrumb.style.display = "none";
         return;
     }
@@ -57,7 +61,7 @@ const renderBreadcrumb = (folderId) => {
         </li>
       `;
         }
-        else {
+        else if (folder.id !== "root") {
             breadcrumb.innerHTML += `
         <li class="breadcrumb-item">
           <a href="#/folder/${folder.id}">${folder.name}</a>
@@ -89,11 +93,6 @@ const renderGrid = async (folderId) => {
     }
     else if (folderId && !currentFolder) {
         h2.innerHTML = "Folder not found";
-    }
-    else {
-        h2.innerHTML = "Documents";
-        folders = _services_storage__WEBPACK_IMPORTED_MODULE_1__.folderStorage.folders;
-        files = _services_storage__WEBPACK_IMPORTED_MODULE_1__.rootFileStorage.rootFiles;
     }
     folders.forEach(folder => {
         const row = createFolderRow(folder);
@@ -152,6 +151,10 @@ const createFolderRow = (folder) => {
         const newName = prompt("Rename folder", folder.name);
         if (!newName || !newName.trim())
             return;
+        if (hasInvalidChars(newName)) {
+            alert("Error: Folder name contains an invalid character: \\ / : * ? \" < > |");
+            return;
+        }
         _services_storage__WEBPACK_IMPORTED_MODULE_1__.folderStorage.updateFolder(folder.id, {
             name: newName.trim(),
             modifiedBy: "You",
@@ -196,6 +199,10 @@ const createFileRow = (file) => {
         const newName = prompt("Rename file", file.name);
         if (!newName.trim())
             return;
+        if (hasInvalidChars(newName)) {
+            alert("Error: File name contains an invalid character: \\ / : * ? \" < > |");
+            return;
+        }
         const newFile = {
             name: newName.trim(),
             type: file.type,
@@ -203,12 +210,7 @@ const createFileRow = (file) => {
             modifiedBy: "You",
         };
         const folderId = getCurrentFolderId();
-        if (window.location.hash.startsWith("#/folder/")) {
-            _services_storage__WEBPACK_IMPORTED_MODULE_1__.folderStorage.updateFile(folderId, file.id, newFile);
-        }
-        else {
-            _services_storage__WEBPACK_IMPORTED_MODULE_1__.rootFileStorage.updateRootFile(file.id, newFile);
-        }
+        _services_storage__WEBPACK_IMPORTED_MODULE_1__.folderStorage.updateFile(folderId, file.id, newFile);
         renderGrid(folderId);
     });
     row.querySelector(".delete-file")?.addEventListener("click", (e) => {
@@ -216,12 +218,7 @@ const createFileRow = (file) => {
         if (!confirm(`Delete file "${file.name}"?`))
             return;
         const folderId = getCurrentFolderId();
-        if (window.location.hash.startsWith("#/folder/")) {
-            _services_storage__WEBPACK_IMPORTED_MODULE_1__.folderStorage.deleteFile(folderId, file.id);
-        }
-        else {
-            _services_storage__WEBPACK_IMPORTED_MODULE_1__.rootFileStorage.deleteRootFile(file.id);
-        }
+        _services_storage__WEBPACK_IMPORTED_MODULE_1__.folderStorage.deleteFile(folderId, file.id);
         renderGrid(folderId);
     });
     initRowSelection(row);
@@ -242,62 +239,67 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   FILE_EXT_MAP: function() { return /* binding */ FILE_EXT_MAP; },
 /* harmony export */   FOLDER_STORAGE_KEY: function() { return /* binding */ FOLDER_STORAGE_KEY; },
-/* harmony export */   ROOT_FILE_STORAGE_KEY: function() { return /* binding */ ROOT_FILE_STORAGE_KEY; },
-/* harmony export */   SEED_FILES: function() { return /* binding */ SEED_FILES; },
-/* harmony export */   SEED_FOLDERS: function() { return /* binding */ SEED_FOLDERS; }
+/* harmony export */   SEED_DATA: function() { return /* binding */ SEED_DATA; }
 /* harmony export */ });
-const ROOT_FILE_STORAGE_KEY = "trainingAssignment1.rootFileData";
 const FOLDER_STORAGE_KEY = "trainingAssignment1.folderData";
-const SEED_FOLDERS = [
-    {
-        id: crypto.randomUUID(),
-        name: "CAS",
-        subFolders: [],
-        files: [],
-        createdAt: 1745995351000,
-        createdBy: "Megan Bowen",
-        modifiedAt: 1745995351000,
-        modifiedBy: "Megan Bowen",
-    }
-];
-const SEED_FILES = [
-    {
-        id: crypto.randomUUID(),
-        name: "CoasterAndBargeLoading.xlsx",
-        type: "excel",
-        createdAt: Date.now(),
-        createdBy: "Administrator MOD",
-        modifiedAt: Date.now(),
-        modifiedBy: "Administrator MOD",
-    },
-    {
-        id: crypto.randomUUID(),
-        name: "RevenueByServices.xlsx",
-        type: "excel",
-        createdAt: Date.now(),
-        createdBy: "Administrator MOD",
-        modifiedAt: Date.now(),
-        modifiedBy: "Administrator MOD",
-    },
-    {
-        id: crypto.randomUUID(),
-        name: "RevenueByServices2016.xlsx",
-        type: "excel",
-        createdAt: Date.now(),
-        createdBy: "Administrator MOD",
-        modifiedAt: Date.now(),
-        modifiedBy: "Administrator MOD",
-    },
-    {
-        id: crypto.randomUUID(),
-        name: "RevenueByServices2017.xlsx",
-        type: "excel",
-        createdAt: Date.now(),
-        createdBy: "Administrator MOD",
-        modifiedAt: Date.now(),
-        modifiedBy: "Administrator MOD",
-    },
-];
+const SEED_DATA = {
+    id: "root",
+    name: "Documents",
+    subFolders: [
+        {
+            id: crypto.randomUUID(),
+            name: "CAS",
+            subFolders: [],
+            files: [],
+            createdAt: 1745995351000,
+            createdBy: "Megan Bowen",
+            modifiedAt: 1745995351000,
+            modifiedBy: "Megan Bowen",
+        }
+    ],
+    files: [
+        {
+            id: crypto.randomUUID(),
+            name: "CoasterAndBargeLoading.xlsx",
+            type: "excel",
+            createdAt: Date.now(),
+            createdBy: "Administrator MOD",
+            modifiedAt: Date.now(),
+            modifiedBy: "Administrator MOD",
+        },
+        {
+            id: crypto.randomUUID(),
+            name: "RevenueByServices.xlsx",
+            type: "excel",
+            createdAt: Date.now(),
+            createdBy: "Administrator MOD",
+            modifiedAt: Date.now(),
+            modifiedBy: "Administrator MOD",
+        },
+        {
+            id: crypto.randomUUID(),
+            name: "RevenueByServices2016.xlsx",
+            type: "excel",
+            createdAt: Date.now(),
+            createdBy: "Administrator MOD",
+            modifiedAt: Date.now(),
+            modifiedBy: "Administrator MOD",
+        },
+        {
+            id: crypto.randomUUID(),
+            name: "RevenueByServices2017.xlsx",
+            type: "excel",
+            createdAt: Date.now(),
+            createdBy: "Administrator MOD",
+            modifiedAt: Date.now(),
+            modifiedBy: "Administrator MOD",
+        },
+    ],
+    createdAt: Date.now(),
+    createdBy: "You",
+    modifiedAt: Date.now(),
+    modifiedBy: "You"
+};
 const FILE_EXT_MAP = {
     xlsx: "excel.svg",
     docx: "word.svg",
@@ -318,8 +320,7 @@ const FILE_EXT_MAP = {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   folderStorage: function() { return /* binding */ folderStorage; },
-/* harmony export */   rootFileStorage: function() { return /* binding */ rootFileStorage; }
+/* harmony export */   folderStorage: function() { return /* binding */ folderStorage; }
 /* harmony export */ });
 /* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../constants */ "./src/scripts/constants/index.ts");
 
@@ -336,14 +337,8 @@ const safeParse = (value, fallback) => {
 const generateId = () => {
     return crypto.randomUUID();
 };
-const loadFiles = () => {
-    return safeParse(localStorage.getItem(_constants__WEBPACK_IMPORTED_MODULE_0__.ROOT_FILE_STORAGE_KEY), []);
-};
 const loadFolders = () => {
     return safeParse(localStorage.getItem(_constants__WEBPACK_IMPORTED_MODULE_0__.FOLDER_STORAGE_KEY), []);
-};
-const saveFiles = (files) => {
-    localStorage.setItem(_constants__WEBPACK_IMPORTED_MODULE_0__.ROOT_FILE_STORAGE_KEY, JSON.stringify(files));
 };
 const saveFolders = (folders) => {
     localStorage.setItem(_constants__WEBPACK_IMPORTED_MODULE_0__.FOLDER_STORAGE_KEY, JSON.stringify(folders));
@@ -358,50 +353,9 @@ const walkFolders = (folders, fn) => {
     }
     return false;
 };
-const rootFileStorage = {
-    get rootFiles() {
-        return loadFiles();
-    },
-    seed: () => {
-        saveFiles(_constants__WEBPACK_IMPORTED_MODULE_0__.SEED_FILES);
-    },
-    createRootFile: (data) => {
-        const files = loadFiles();
-        const newFile = {
-            ...data,
-            id: generateId(),
-            createdAt: Date.now(),
-            modifiedAt: Date.now(),
-        };
-        files.push(newFile);
-        saveFiles(files);
-        return newFile;
-    },
-    updateRootFile: (fileId, data) => {
-        const files = loadFiles();
-        const fileIndex = files.findIndex(f => f.id === fileId);
-        if (fileIndex === -1)
-            return undefined;
-        files[fileIndex] = { ...files[fileIndex], ...data, modifiedAt: Date.now() };
-        saveFiles(files);
-        return files[fileIndex];
-    },
-    deleteRootFile: (fileId) => {
-        const files = loadFiles();
-        const newFiles = files.filter(f => f.id !== fileId);
-        if (newFiles.length === files.length)
-            return false;
-        saveFiles(newFiles);
-        return true;
-    },
-};
 const folderStorage = {
-    get folders() {
-        return loadFolders();
-    },
-    seed: () => {
-        saveFolders(_constants__WEBPACK_IMPORTED_MODULE_0__.SEED_FOLDERS);
-    },
+    get folders() { return loadFolders(); },
+    seed: () => saveFolders([_constants__WEBPACK_IMPORTED_MODULE_0__.SEED_DATA]),
     getFolderById: (folderId) => {
         const folders = loadFolders();
         const stack = [...folders];
@@ -416,21 +370,6 @@ const folderStorage = {
     },
     createFolder: (data, parentId) => {
         const folders = loadFolders();
-        if (!parentId) {
-            if (folders.some(folder => folder.name === data.name)) {
-                alert(`A folder with name "${data.name}" already exists.`);
-                return;
-            }
-            const newFolder = {
-                id: generateId(),
-                createdAt: Date.now(),
-                modifiedAt: Date.now(),
-                ...data,
-            };
-            folders.push(newFolder);
-            saveFolders(folders);
-            return newFolder;
-        }
         let createdFolder;
         walkFolders(folders, (folder) => {
             if (folder.id !== parentId)
@@ -487,8 +426,6 @@ const folderStorage = {
         return deleted;
     },
     createFile: (folderId, data) => {
-        if (!folderId)
-            return undefined;
         const folders = loadFolders();
         let createdFile;
         walkFolders(folders, (folder) => {
@@ -646,9 +583,13 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+const hasInvalidChars = (str) => {
+    const invalid = ["\\", "/", ":", "*", "?", "\"", "<", ">", "|"];
+    return invalid.some(char => str.includes(char));
+};
 const getCurrentFolderId = () => {
     const match = window.location.hash.match(/^#\/folder\/([^/]+)/);
-    return match ? match[1] : undefined;
+    return match ? match[1] : "root";
 };
 const renderCurrentFolder = async () => {
     (0,_components_grid__WEBPACK_IMPORTED_MODULE_0__["default"])(getCurrentFolderId());
@@ -658,6 +599,10 @@ const createNewFolder = () => {
     const folderName = prompt("Folder name", "New folder");
     if (!folderName || !folderName.trim())
         return;
+    if (hasInvalidChars(folderName)) {
+        alert("Error: Folder name contains an invalid character: \\ / : * ? \" < > |");
+        return;
+    }
     _services_storage__WEBPACK_IMPORTED_MODULE_1__.folderStorage.createFolder({
         name: folderName.trim(),
         files: [],
@@ -668,10 +613,8 @@ const createNewFolder = () => {
     renderCurrentFolder();
 };
 (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_2__["default"])(async () => {
-    if (_services_storage__WEBPACK_IMPORTED_MODULE_1__.rootFileStorage.rootFiles.length === 0) {
-        _services_storage__WEBPACK_IMPORTED_MODULE_1__.rootFileStorage.seed();
-    }
-    if (_services_storage__WEBPACK_IMPORTED_MODULE_1__.folderStorage.folders.length === 0) {
+    const rootFolder = _services_storage__WEBPACK_IMPORTED_MODULE_1__.folderStorage.folders[0];
+    if (!rootFolder || rootFolder.subFolders.length + rootFolder.files.length === 0) {
         _services_storage__WEBPACK_IMPORTED_MODULE_1__.folderStorage.seed();
     }
     await renderCurrentFolder();
@@ -699,12 +642,7 @@ const createNewFolder = () => {
                 createdBy: "You",
                 modifiedBy: "You",
             };
-            if (currentFolderId) {
-                _services_storage__WEBPACK_IMPORTED_MODULE_1__.folderStorage.createFile(currentFolderId, fileMeta);
-            }
-            else {
-                _services_storage__WEBPACK_IMPORTED_MODULE_1__.rootFileStorage.createRootFile(fileMeta);
-            }
+            _services_storage__WEBPACK_IMPORTED_MODULE_1__.folderStorage.createFile(currentFolderId, fileMeta);
         }
         renderCurrentFolder();
     });

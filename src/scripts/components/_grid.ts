@@ -1,7 +1,7 @@
 import { FILE_EXT_MAP } from "../constants";
 import { FileItem } from "../models/file";
 import { FolderItem } from "../models/folder";
-import { folderStorage, rootFileStorage } from "../services/storage";
+import { folderStorage } from "../services/storage";
 
 const delay = (ms = 250) => new Promise<void>(resolve => setTimeout(resolve, ms));
 
@@ -9,9 +9,14 @@ const spinner = document.getElementById("loading-spinner");
 const showSpinner = () => spinner?.classList.remove("d-none");
 const hideSpinner = () => spinner?.classList.add("d-none");
 
-const getCurrentFolderId = (): string | undefined => {
+const getCurrentFolderId = (): string => {
   const match = window.location.hash.match(/^#\/folder\/([^/]+)/);
-  return match ? match[1] : undefined;
+  return match ? match[1] : "root";
+};
+
+const hasInvalidChars = (str: string) => {
+  const invalid = ["\\", "/", ":", "*", "?", "\"", "<", ">", "|"];
+  return invalid.some(char => str.includes(char));
 };
 
 const getFolderPath = (folderId?: string): FolderItem[] => {
@@ -34,7 +39,7 @@ const getFolderPath = (folderId?: string): FolderItem[] => {
 
 const renderBreadcrumb = (folderId?: string) => {
   const breadcrumb = document.querySelector<HTMLOListElement>('.breadcrumb');
-  if (!folderId) {
+  if (folderId === "root") {
     breadcrumb.style.display = "none";
     return;
   }
@@ -49,7 +54,7 @@ const renderBreadcrumb = (folderId?: string) => {
           ${folder.name}
         </li>
       `;
-    } else {
+    } else if (folder.id !== "root") {
       breadcrumb.innerHTML += `
         <li class="breadcrumb-item">
           <a href="#/folder/${folder.id}">${folder.name}</a>
@@ -83,10 +88,6 @@ const renderGrid = async (folderId?: string) => {
     files = currentFolder.files;
   } else if (folderId && !currentFolder) {
     h2.innerHTML = "Folder not found";
-  } else {
-    h2.innerHTML = "Documents";
-    folders = folderStorage.folders;
-    files = rootFileStorage.rootFiles;
   }
 
   folders.forEach(folder => {
@@ -152,6 +153,10 @@ const createFolderRow = (folder: FolderItem) => {
     e.preventDefault();
     const newName = prompt("Rename folder", folder.name);
     if (!newName || !newName.trim()) return;
+    if (hasInvalidChars(newName)) {
+      alert("Error: Folder name contains an invalid character: \\ / : * ? \" < > |");
+      return;
+    }
 
     folderStorage.updateFolder(folder.id, {
       name: newName.trim(),
@@ -201,6 +206,10 @@ const createFileRow = (file: FileItem) => {
     e.preventDefault();
     const newName = prompt("Rename file", file.name);
     if (!newName.trim()) return;
+    if (hasInvalidChars(newName)) {
+      alert("Error: File name contains an invalid character: \\ / : * ? \" < > |");
+      return;
+    }
 
     const newFile = {
       name: newName.trim(),
@@ -210,11 +219,7 @@ const createFileRow = (file: FileItem) => {
     };
 
     const folderId = getCurrentFolderId();
-    if (window.location.hash.startsWith("#/folder/")) {
-      folderStorage.updateFile(folderId, file.id, newFile);
-    } else {
-      rootFileStorage.updateRootFile(file.id, newFile);
-    }
+    folderStorage.updateFile(folderId, file.id, newFile);
     renderGrid(folderId);
   });
 
@@ -223,11 +228,7 @@ const createFileRow = (file: FileItem) => {
     if (!confirm(`Delete file "${file.name}"?`)) return;
 
     const folderId = getCurrentFolderId();
-    if (window.location.hash.startsWith("#/folder/")) {
-      folderStorage.deleteFile(folderId, file.id);
-    } else {
-      rootFileStorage.deleteRootFile(file.id);
-    }
+    folderStorage.deleteFile(folderId, file.id);
     renderGrid(folderId);
   });
 
