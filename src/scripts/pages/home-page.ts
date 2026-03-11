@@ -1,18 +1,9 @@
 import renderGrid from '../components/_grid';
 import { folderStorage } from '../services/storage';
 import ready from '../utilities/_helper';
+import { getCurrentFolderId, hasInvalidChars } from '../utilities/_methods';
 
-const hasInvalidChars = (str: string) => {
-  const invalid = ["\\", "/", ":", "*", "?", "\"", "<", ">", "|"];
-  return invalid.some(char => str.includes(char));
-};
-
-const getCurrentFolderId = (): string => {
-  const match = window.location.hash.match(/^#\/folder\/([^/]+)/);
-  return match ? match[1] : "root";
-};
-
-const renderCurrentFolder = async () => {
+const renderCurrentFolder = () => {
   renderGrid(getCurrentFolderId());
 };
 
@@ -37,13 +28,13 @@ const createNewFolder = () => {
   renderCurrentFolder();
 };
 
-ready(async () => {
+ready(() => {
   const rootFolder = folderStorage.folders[0];
   if (!rootFolder || rootFolder.subFolders.length + rootFolder.files.length === 0) {
     folderStorage.seed();
   }
 
-  await renderCurrentFolder();
+  renderCurrentFolder();
   window.addEventListener("hashchange", renderCurrentFolder);
 
   const newButton = document.querySelector<HTMLAnchorElement>("#button-new");

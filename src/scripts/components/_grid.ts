@@ -2,22 +2,13 @@ import { FILE_EXT_MAP } from "../constants";
 import { FileItem } from "../models/file";
 import { FolderItem } from "../models/folder";
 import { folderStorage } from "../services/storage";
+import { getCurrentFolderId, hasInvalidChars } from "../utilities/_methods";
 
 const delay = (ms = 250) => new Promise<void>(resolve => setTimeout(resolve, ms));
 
 const spinner = document.getElementById("loading-spinner");
 const showSpinner = () => spinner?.classList.remove("d-none");
 const hideSpinner = () => spinner?.classList.add("d-none");
-
-const getCurrentFolderId = (): string => {
-  const match = window.location.hash.match(/^#\/folder\/([^/]+)/);
-  return match ? match[1] : "root";
-};
-
-const hasInvalidChars = (str: string) => {
-  const invalid = ["\\", "/", ":", "*", "?", "\"", "<", ">", "|"];
-  return invalid.some(char => str.includes(char));
-};
 
 const getFolderPath = (folderId?: string): FolderItem[] => {
   if (!folderId) return [];
