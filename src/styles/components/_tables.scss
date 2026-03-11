@@ -97,9 +97,12 @@
             background-color: $navbar-color;
           }
 
-          &:last-child,
           &:nth-last-child(2) {
             display: none;
+          }
+
+          &:last-child {
+            @include border(top, 1px);
           }
 
           @include card-row-header(2, "File Type");
@@ -109,6 +112,12 @@
 
           i,
           img {
+            margin-left: auto;
+          }
+
+          .row-actions {
+            display: flex;
+            visibility: visible !important;
             margin-left: auto;
           }
         }
