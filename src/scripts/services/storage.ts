@@ -1,60 +1,11 @@
+import {
+    ROOT_FILE_STORAGE_KEY,
+    FOLDER_STORAGE_KEY,
+    SEED_FILES,
+    SEED_FOLDERS
+} from "../constants";
 import { FileItem } from "../models/file";
 import { FolderItem } from "../models/folder";
-
-const ROOT_FILE_STORAGE_KEY = "trainingAssignment1.rootFileData";
-const FOLDER_STORAGE_KEY = "trainingAssignment1.folderData";
-
-const SEED_FOLDERS: FolderItem[] = [
-    {
-        id: crypto.randomUUID(),
-        name: "CAS",
-        subFolders: [],
-        files: [],
-        createdAt: 1745995351000,
-        createdBy: "Megan Bowen",
-        modifiedAt: 1745995351000,
-        modifiedBy: "Megan Bowen",
-    }
-];
-
-const SEED_FILES: FileItem[] = [
-    {
-        id: crypto.randomUUID(),
-        name: "CoasterAndBargeLoading.xlsx",
-        type: "excel",
-        createdAt: Date.now(),
-        createdBy: "Administrator MOD",
-        modifiedAt: Date.now(),
-        modifiedBy: "Administrator MOD",
-    },
-    {
-        id: crypto.randomUUID(),
-        name: "RevenueByServices.xlsx",
-        type: "excel",
-        createdAt: Date.now(),
-        createdBy: "Administrator MOD",
-        modifiedAt: Date.now(),
-        modifiedBy: "Administrator MOD",
-    },
-    {
-        id: crypto.randomUUID(),
-        name: "RevenueByServices2016.xlsx",
-        type: "excel",
-        createdAt: Date.now(),
-        createdBy: "Administrator MOD",
-        modifiedAt: Date.now(),
-        modifiedBy: "Administrator MOD",
-    },
-    {
-        id: crypto.randomUUID(),
-        name: "RevenueByServices2017.xlsx",
-        type: "excel",
-        createdAt: Date.now(),
-        createdBy: "Administrator MOD",
-        modifiedAt: Date.now(),
-        modifiedBy: "Administrator MOD",
-    },
-]
 
 const safeParse = <T>(value: string | null, fallback: T): T => {
     if (!value) return fallback;
@@ -97,8 +48,8 @@ const walkFolders = (
     return false;
 };
 
-export const rootFileStorage = {    
-    get rootFiles() : FileItem[] {
+export const rootFileStorage = {
+    get rootFiles(): FileItem[] {
         return loadFiles();
     },
 
@@ -139,7 +90,7 @@ export const rootFileStorage = {
 };
 
 export const folderStorage = {
-    get folders() : FolderItem[] {
+    get folders(): FolderItem[] {
         return loadFolders();
     },
 
@@ -261,7 +212,7 @@ export const folderStorage = {
             createdFile = newFile;
             return true;
         });
-        
+
         if (createdFile) saveFolders(folders);
         return createdFile;
     },
@@ -281,7 +232,7 @@ export const folderStorage = {
             updatedFile = folder.files[fileIndex];
             return true;
         });
-        
+
         if (updatedFile) saveFolders(folders);
         return updatedFile;
     },

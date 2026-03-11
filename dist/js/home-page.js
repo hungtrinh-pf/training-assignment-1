@@ -9,16 +9,10 @@
 /***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _services_storage__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../services/storage */ "./src/scripts/services/storage.ts");
+/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../constants */ "./src/scripts/constants/index.ts");
+/* harmony import */ var _services_storage__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../services/storage */ "./src/scripts/services/storage.ts");
 
-const FILE_EXT_MAP = {
-    xlsx: "excel.svg",
-    docx: "word.svg",
-    pptx: "powerpoint.svg",
-    md: "markdown.svg",
-    pdf: "pdf.svg",
-    txt: "text.svg",
-};
+
 const delay = (ms = 250) => new Promise(resolve => setTimeout(resolve, ms));
 const spinner = document.getElementById("loading-spinner");
 const showSpinner = () => spinner?.classList.remove("d-none");
@@ -43,7 +37,7 @@ const getFolderPath = (folderId) => {
         }
         return false;
     };
-    walk(_services_storage__WEBPACK_IMPORTED_MODULE_0__.folderStorage.folders, []);
+    walk(_services_storage__WEBPACK_IMPORTED_MODULE_1__.folderStorage.folders, []);
     return path;
 };
 const renderBreadcrumb = (folderId) => {
@@ -87,7 +81,7 @@ const renderGrid = async (folderId) => {
     renderBreadcrumb(folderId);
     let folders = [];
     let files = [];
-    const currentFolder = _services_storage__WEBPACK_IMPORTED_MODULE_0__.folderStorage.getFolderById(folderId ?? '');
+    const currentFolder = _services_storage__WEBPACK_IMPORTED_MODULE_1__.folderStorage.getFolderById(folderId ?? '');
     if (currentFolder) {
         h2.innerHTML = currentFolder.name;
         folders = currentFolder.subFolders;
@@ -98,8 +92,8 @@ const renderGrid = async (folderId) => {
     }
     else {
         h2.innerHTML = "Documents";
-        folders = _services_storage__WEBPACK_IMPORTED_MODULE_0__.folderStorage.folders;
-        files = _services_storage__WEBPACK_IMPORTED_MODULE_0__.rootFileStorage.rootFiles;
+        folders = _services_storage__WEBPACK_IMPORTED_MODULE_1__.folderStorage.folders;
+        files = _services_storage__WEBPACK_IMPORTED_MODULE_1__.rootFileStorage.rootFiles;
     }
     folders.forEach(folder => {
         const row = createFolderRow(folder);
@@ -158,7 +152,7 @@ const createFolderRow = (folder) => {
         const newName = prompt("Rename folder", folder.name);
         if (!newName || !newName.trim())
             return;
-        _services_storage__WEBPACK_IMPORTED_MODULE_0__.folderStorage.updateFolder(folder.id, {
+        _services_storage__WEBPACK_IMPORTED_MODULE_1__.folderStorage.updateFolder(folder.id, {
             name: newName.trim(),
             modifiedBy: "You",
         });
@@ -168,7 +162,7 @@ const createFolderRow = (folder) => {
         e.preventDefault();
         if (!confirm(`Delete folder "${folder.name}"?`))
             return;
-        _services_storage__WEBPACK_IMPORTED_MODULE_0__.folderStorage.deleteFolder(folder.id);
+        _services_storage__WEBPACK_IMPORTED_MODULE_1__.folderStorage.deleteFolder(folder.id);
         renderGrid(currentFolderId);
     });
     initRowSelection(row);
@@ -182,8 +176,8 @@ const createFileRow = (file) => {
         <input type="checkbox" class="row-select" />
       </td>
       <td>
-        ${FILE_EXT_MAP[fileExt]
-        ? `<img src="src/icons/${FILE_EXT_MAP[fileExt]}">`
+        ${_constants__WEBPACK_IMPORTED_MODULE_0__.FILE_EXT_MAP[fileExt]
+        ? `<img src="src/icons/${_constants__WEBPACK_IMPORTED_MODULE_0__.FILE_EXT_MAP[fileExt]}">`
         : `<i class="ms-Icon ms-Icon--Page"></i>`}
       </td>
       <td>${file.name}</td>
@@ -210,10 +204,10 @@ const createFileRow = (file) => {
         };
         const folderId = getCurrentFolderId();
         if (window.location.hash.startsWith("#/folder/")) {
-            _services_storage__WEBPACK_IMPORTED_MODULE_0__.folderStorage.updateFile(folderId, file.id, newFile);
+            _services_storage__WEBPACK_IMPORTED_MODULE_1__.folderStorage.updateFile(folderId, file.id, newFile);
         }
         else {
-            _services_storage__WEBPACK_IMPORTED_MODULE_0__.rootFileStorage.updateRootFile(file.id, newFile);
+            _services_storage__WEBPACK_IMPORTED_MODULE_1__.rootFileStorage.updateRootFile(file.id, newFile);
         }
         renderGrid(folderId);
     });
@@ -223,10 +217,10 @@ const createFileRow = (file) => {
             return;
         const folderId = getCurrentFolderId();
         if (window.location.hash.startsWith("#/folder/")) {
-            _services_storage__WEBPACK_IMPORTED_MODULE_0__.folderStorage.deleteFile(folderId, file.id);
+            _services_storage__WEBPACK_IMPORTED_MODULE_1__.folderStorage.deleteFile(folderId, file.id);
         }
         else {
-            _services_storage__WEBPACK_IMPORTED_MODULE_0__.rootFileStorage.deleteRootFile(file.id);
+            _services_storage__WEBPACK_IMPORTED_MODULE_1__.rootFileStorage.deleteRootFile(file.id);
         }
         renderGrid(folderId);
     });
@@ -238,16 +232,19 @@ const createFileRow = (file) => {
 
 /***/ }),
 
-/***/ "./src/scripts/services/storage.ts":
-/*!*****************************************!*\
-  !*** ./src/scripts/services/storage.ts ***!
-  \*****************************************/
+/***/ "./src/scripts/constants/index.ts":
+/*!****************************************!*\
+  !*** ./src/scripts/constants/index.ts ***!
+  \****************************************/
 /***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   folderStorage: function() { return /* binding */ folderStorage; },
-/* harmony export */   rootFileStorage: function() { return /* binding */ rootFileStorage; }
+/* harmony export */   FILE_EXT_MAP: function() { return /* binding */ FILE_EXT_MAP; },
+/* harmony export */   FOLDER_STORAGE_KEY: function() { return /* binding */ FOLDER_STORAGE_KEY; },
+/* harmony export */   ROOT_FILE_STORAGE_KEY: function() { return /* binding */ ROOT_FILE_STORAGE_KEY; },
+/* harmony export */   SEED_FILES: function() { return /* binding */ SEED_FILES; },
+/* harmony export */   SEED_FOLDERS: function() { return /* binding */ SEED_FOLDERS; }
 /* harmony export */ });
 const ROOT_FILE_STORAGE_KEY = "trainingAssignment1.rootFileData";
 const FOLDER_STORAGE_KEY = "trainingAssignment1.folderData";
@@ -301,6 +298,31 @@ const SEED_FILES = [
         modifiedBy: "Administrator MOD",
     },
 ];
+const FILE_EXT_MAP = {
+    xlsx: "excel.svg",
+    docx: "word.svg",
+    pptx: "powerpoint.svg",
+    md: "markdown.svg",
+    pdf: "pdf.svg",
+    txt: "text.svg",
+};
+
+
+/***/ }),
+
+/***/ "./src/scripts/services/storage.ts":
+/*!*****************************************!*\
+  !*** ./src/scripts/services/storage.ts ***!
+  \*****************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   folderStorage: function() { return /* binding */ folderStorage; },
+/* harmony export */   rootFileStorage: function() { return /* binding */ rootFileStorage; }
+/* harmony export */ });
+/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../constants */ "./src/scripts/constants/index.ts");
+
 const safeParse = (value, fallback) => {
     if (!value)
         return fallback;
@@ -315,16 +337,16 @@ const generateId = () => {
     return crypto.randomUUID();
 };
 const loadFiles = () => {
-    return safeParse(localStorage.getItem(ROOT_FILE_STORAGE_KEY), []);
+    return safeParse(localStorage.getItem(_constants__WEBPACK_IMPORTED_MODULE_0__.ROOT_FILE_STORAGE_KEY), []);
 };
 const loadFolders = () => {
-    return safeParse(localStorage.getItem(FOLDER_STORAGE_KEY), []);
+    return safeParse(localStorage.getItem(_constants__WEBPACK_IMPORTED_MODULE_0__.FOLDER_STORAGE_KEY), []);
 };
 const saveFiles = (files) => {
-    localStorage.setItem(ROOT_FILE_STORAGE_KEY, JSON.stringify(files));
+    localStorage.setItem(_constants__WEBPACK_IMPORTED_MODULE_0__.ROOT_FILE_STORAGE_KEY, JSON.stringify(files));
 };
 const saveFolders = (folders) => {
-    localStorage.setItem(FOLDER_STORAGE_KEY, JSON.stringify(folders));
+    localStorage.setItem(_constants__WEBPACK_IMPORTED_MODULE_0__.FOLDER_STORAGE_KEY, JSON.stringify(folders));
 };
 const walkFolders = (folders, fn) => {
     for (let i = 0; i < folders.length; i++) {
@@ -341,7 +363,7 @@ const rootFileStorage = {
         return loadFiles();
     },
     seed: () => {
-        saveFiles(SEED_FILES);
+        saveFiles(_constants__WEBPACK_IMPORTED_MODULE_0__.SEED_FILES);
     },
     createRootFile: (data) => {
         const files = loadFiles();
@@ -378,7 +400,7 @@ const folderStorage = {
         return loadFolders();
     },
     seed: () => {
-        saveFolders(SEED_FOLDERS);
+        saveFolders(_constants__WEBPACK_IMPORTED_MODULE_0__.SEED_FOLDERS);
     },
     getFolderById: (folderId) => {
         const folders = loadFolders();

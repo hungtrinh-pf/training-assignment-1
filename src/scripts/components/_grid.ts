@@ -1,15 +1,7 @@
+import { FILE_EXT_MAP } from "../constants";
 import { FileItem } from "../models/file";
 import { FolderItem } from "../models/folder";
 import { folderStorage, rootFileStorage } from "../services/storage";
-
-const FILE_EXT_MAP = {
-  xlsx: "excel.svg",
-  docx: "word.svg",
-  pptx: "powerpoint.svg",
-  md: "markdown.svg",
-  pdf: "pdf.svg",
-  txt: "text.svg",
-};
 
 const delay = (ms = 250) => new Promise<void>(resolve => setTimeout(resolve, ms));
 
