@@ -2,18 +2,19 @@ import renderGrid from '../components/_grid';
 import { dataStorage } from '../services/storage';
 import { ready } from '../utilities/_helper';
 import { getCurrentFolderId, hasInvalidChars } from '../utilities/_helper';
+import { showAlert, showPrompt } from '../utilities/_modal';
 
 const renderCurrentFolder = () => {
   renderGrid(getCurrentFolderId());
 };
 
-const createNewFolder = () => {
+const createNewFolder = async () => {
   const currentFolderId = getCurrentFolderId();
 
-  const folderName = prompt("Folder name", "New folder");
-  if (!folderName || !folderName.trim()) return;
+  const folderName = await showPrompt("Folder name", "New folder");
+  if (typeof folderName !== "string" || !folderName.trim()) return;
   if (hasInvalidChars(folderName)) {
-    alert("Error: Folder name contains an invalid character: \\ / : * ? \" < > |");
+    showAlert("Error: Folder name contains an invalid character: \\ / : * ? \" < > |");
     return;
   }
 

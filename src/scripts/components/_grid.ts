@@ -3,6 +3,7 @@ import { FileItem } from "../models/file";
 import { FolderItem } from "../models/folder";
 import { dataStorage } from "../services/storage";
 import { getCurrentFolderId, hasInvalidChars } from "../utilities/_helper";
+import { showAlert, showConfirm, showPrompt } from "../utilities/_modal";
 
 const delay = (ms = 250) => new Promise<void>(resolve => setTimeout(resolve, ms));
 
@@ -136,12 +137,12 @@ const createFolderRow = (folder: FolderItem) => {
       </td>
     `;
 
-  row.querySelector(".rename-folder")?.addEventListener("click", (e) => {
+  row.querySelector(".rename-folder")?.addEventListener("click", async (e) => {
     e.preventDefault();
-    const newName = prompt("Rename folder", folder.name);
-    if (!newName || !newName.trim()) return;
+    const newName = await showPrompt("Rename folder", folder.name);
+    if (typeof newName !== "string" || !newName.trim()) return;
     if (hasInvalidChars(newName)) {
-      alert("Error: Folder name contains an invalid character: \\ / : * ? \" < > |");
+      showAlert("Error: Folder name contains an invalid character: \\ / : * ? \" < > |");
       return;
     }
 
@@ -152,9 +153,9 @@ const createFolderRow = (folder: FolderItem) => {
     renderGrid(currentFolderId);
   });
 
-  row.querySelector(".delete-folder")?.addEventListener("click", (e) => {
+  row.querySelector(".delete-folder")?.addEventListener("click", async (e) => {
     e.preventDefault();
-    if (!confirm(`Delete folder "${folder.name}"?`)) return;
+    if (!(await showConfirm(`Delete folder "${folder.name}"?`))) return;
 
     dataStorage.deleteFolder(folder.id);
     renderGrid(currentFolderId);
@@ -189,12 +190,12 @@ const createFileRow = (file: FileItem) => {
       </td>
     `;
 
-  row.querySelector(".rename-file")?.addEventListener("click", (e) => {
+  row.querySelector(".rename-file")?.addEventListener("click", async (e) => {
     e.preventDefault();
-    const newName = prompt("Rename file", file.name);
-    if (!newName.trim()) return;
+    const newName = await showPrompt("Rename file", file.name);
+    if (typeof newName !== "string" || !newName.trim()) return;
     if (hasInvalidChars(newName)) {
-      alert("Error: File name contains an invalid character: \\ / : * ? \" < > |");
+      showAlert("Error: File name contains an invalid character: \\ / : * ? \" < > |");
       return;
     }
 
@@ -209,9 +210,9 @@ const createFileRow = (file: FileItem) => {
     renderGrid(getCurrentFolderId());
   });
 
-  row.querySelector(".delete-file")?.addEventListener("click", (e) => {
+  row.querySelector(".delete-file")?.addEventListener("click", async (e) => {
     e.preventDefault();
-    if (!confirm(`Delete file "${file.name}"?`)) return;
+    if (!(await showConfirm(`Delete file "${file.name}"?`))) return;
 
     dataStorage.deleteFile(file.id);
     renderGrid(getCurrentFolderId());

@@ -1,6 +1,7 @@
 import { FILE_STORAGE_KEY, FOLDER_STORAGE_KEY, SEED_FILES, SEED_FOLDERS } from "../constants";
 import { FileCreateDto, FileItem, FileUpdateDto } from "../models/file";
 import { FolderCreateDto, FolderItem, FolderUpdateDto } from "../models/folder";
+import { showAlert } from "../utilities/_modal";
 import { generateId, safeParse } from "../utilities/_storage";
 
 const loadFiles = (): FileItem[] => {
@@ -38,7 +39,7 @@ export const dataStorage = {
         const subFolders = folders.filter((folder) => folder.parentId === data.parentId);
 
         if (subFolders.some((folder) => folder.name === data.name)) {
-            alert(`A folder with name "${data.name}" already exists.`);
+            showAlert(`A folder with name "${data.name}" already exists.`);
             return;
         }
 
@@ -60,7 +61,7 @@ export const dataStorage = {
 
         const parentArray = folders.filter((folder) => folder.parentId === folderToUpdate.parentId);
         if (parentArray.some((folder) => folder.name === data.name)) {
-            alert(`A folder with name "${data.name}" already exists.`);
+            showAlert(`A folder with name "${data.name}" already exists.`);
             return;
         }
 
