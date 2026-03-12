@@ -7710,46 +7710,71 @@ const FILE_EXT_MAP = {
 
 /***/ }),
 
-/***/ "./src/scripts/services/modal.ts":
-/*!***************************************!*\
-  !*** ./src/scripts/services/modal.ts ***!
-  \***************************************/
+/***/ "./src/scripts/services/modal/alert.ts":
+/*!*********************************************!*\
+  !*** ./src/scripts/services/modal/alert.ts ***!
+  \*********************************************/
 /***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   ModalProvider: function() { return /* binding */ ModalProvider; }
+/* harmony export */   AlertModal: function() { return /* binding */ AlertModal; }
+/* harmony export */ });
+/* harmony import */ var _base__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./base */ "./src/scripts/services/modal/base.ts");
+
+class AlertModal extends _base__WEBPACK_IMPORTED_MODULE_0__.BaseModal {
+    constructor({ title, body }) {
+        super({ title, body });
+    }
+    show() {
+        return new Promise(resolve => {
+            this.createModal(`
+                <div class="modal fade" id="${this.id}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header"><h5 class="modal-title">${this.title}</h5></div>
+                            <div class="modal-body">
+                                <div>${this.body}</div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-primary" data-action="ok">OK</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `);
+            const okBtn = this.modalElement.querySelector('[data-action="ok"]');
+            this.modalElement.addEventListener("hidden.bs.modal", () => this.disposeModal(), { once: true });
+            okBtn.addEventListener("click", () => { resolve(true); this.modal.hide(); }, { once: true });
+            this.modal.show();
+        });
+    }
+}
+
+
+/***/ }),
+
+/***/ "./src/scripts/services/modal/base.ts":
+/*!********************************************!*\
+  !*** ./src/scripts/services/modal/base.ts ***!
+  \********************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   BaseModal: function() { return /* binding */ BaseModal; }
 /* harmony export */ });
 /* harmony import */ var bootstrap__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! bootstrap */ "./node_modules/bootstrap/dist/js/bootstrap.esm.js");
 
-class ModalProvider {
-    constructor({ title, body, type, inputValue, }) {
+class BaseModal {
+    constructor({ title, body }) {
         this.modal = null;
         this.modalElement = null;
         this.id = `bs-modal-${Date.now()}`;
         this.title = title;
         this.body = body;
-        this.type = type;
-        this.inputValue = inputValue;
     }
-    createModal() {
-        const html = `
-            <div class="modal fade" id="${this.id}" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header"><h5 class="modal-title">${this.title}</h5></div>
-                        <div class="modal-body">
-                            <div>${this.body}</div>
-                            ${this.type === "prompt" ? `<input class="form-control mt-2" value="${this.inputValue}">` : ""}
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-primary" data-action="ok">OK</button>
-                            ${this.type !== "alert" ? `<button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-action="cancel">Cancel</button>` : ""}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
+    createModal(html) {
         const wrapper = document.createElement("div");
         wrapper.innerHTML = html;
         document.body.appendChild(wrapper.firstElementChild);
@@ -7765,23 +7790,100 @@ class ModalProvider {
         catch { }
         this.modalElement.remove();
     }
+}
+
+
+/***/ }),
+
+/***/ "./src/scripts/services/modal/confirm.ts":
+/*!***********************************************!*\
+  !*** ./src/scripts/services/modal/confirm.ts ***!
+  \***********************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   ConfirmModal: function() { return /* binding */ ConfirmModal; }
+/* harmony export */ });
+/* harmony import */ var _base__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./base */ "./src/scripts/services/modal/base.ts");
+
+class ConfirmModal extends _base__WEBPACK_IMPORTED_MODULE_0__.BaseModal {
+    constructor({ title, body }) {
+        super({ title, body });
+    }
     show() {
         return new Promise(resolve => {
-            this.createModal();
+            this.createModal(`
+                <div class="modal fade" id="${this.id}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header"><h5 class="modal-title">${this.title}</h5></div>
+                            <div class="modal-body">
+                                <div>${this.body}</div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-primary" data-action="ok">OK</button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-action="cancel">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `);
+            const okBtn = this.modalElement.querySelector('[data-action="ok"]');
+            const cancelBtn = this.modalElement.querySelector('[data-action="cancel"]');
+            this.modalElement.addEventListener("hidden.bs.modal", () => this.disposeModal(), { once: true });
+            okBtn.addEventListener("click", () => { resolve(true); this.modal.hide(); }, { once: true });
+            cancelBtn.addEventListener("click", () => { resolve(false); this.modal.hide(); }, { once: true });
+            this.modal.show();
+        });
+    }
+}
+
+
+/***/ }),
+
+/***/ "./src/scripts/services/modal/prompt.ts":
+/*!**********************************************!*\
+  !*** ./src/scripts/services/modal/prompt.ts ***!
+  \**********************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   PromptModal: function() { return /* binding */ PromptModal; }
+/* harmony export */ });
+/* harmony import */ var _base__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./base */ "./src/scripts/services/modal/base.ts");
+
+class PromptModal extends _base__WEBPACK_IMPORTED_MODULE_0__.BaseModal {
+    constructor({ title, body, defaultInput }) {
+        super({ title, body });
+        this.defaultInput = defaultInput;
+    }
+    show() {
+        return new Promise(resolve => {
+            this.createModal(`
+                <div class="modal fade" id="${this.id}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header"><h5 class="modal-title">${this.title}</h5></div>
+                            <div class="modal-body">
+                                <div>${this.body}</div>
+                                <input class="form-control mt-2" value="${this.defaultInput}">
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-primary" data-action="ok">OK</button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-action="cancel">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `);
             const okBtn = this.modalElement.querySelector('[data-action="ok"]');
             const cancelBtn = this.modalElement.querySelector('[data-action="cancel"]');
             const inputEl = this.modalElement.querySelector('input');
             this.modalElement.addEventListener("hidden.bs.modal", () => this.disposeModal(), { once: true });
-            let done = (value) => { resolve(value); this.modal.hide(); };
-            if (this.type === "prompt") {
-                okBtn.addEventListener("click", () => done(inputEl ? inputEl.value : ""), { once: true });
-            }
-            else {
-                okBtn.addEventListener("click", () => done(true), { once: true });
-            }
-            if (cancelBtn) {
-                cancelBtn.addEventListener("click", () => { resolve(false); this.modal.hide(); }, { once: true });
-            }
+            okBtn.addEventListener("click", () => { resolve(inputEl ? inputEl.value : ""); this.modal.hide(); }, { once: true });
+            cancelBtn.addEventListener("click", () => { resolve(false); this.modal.hide(); }, { once: true });
             this.modal.show();
         });
     }
@@ -7946,32 +8048,23 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   showConfirm: function() { return /* binding */ showConfirm; },
 /* harmony export */   showPrompt: function() { return /* binding */ showPrompt; }
 /* harmony export */ });
-/* harmony import */ var _services_modal__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../services/modal */ "./src/scripts/services/modal.ts");
+/* harmony import */ var _services_modal_alert__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../services/modal/alert */ "./src/scripts/services/modal/alert.ts");
+/* harmony import */ var _services_modal_confirm__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../services/modal/confirm */ "./src/scripts/services/modal/confirm.ts");
+/* harmony import */ var _services_modal_prompt__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../services/modal/prompt */ "./src/scripts/services/modal/prompt.ts");
+
+
 
 const showAlert = (message) => {
-    const modal = new _services_modal__WEBPACK_IMPORTED_MODULE_0__.ModalProvider({
-        title: "Alert",
-        body: message,
-        type: "alert"
-    });
+    const modal = new _services_modal_alert__WEBPACK_IMPORTED_MODULE_0__.AlertModal({ title: "Alert", body: message });
     modal.show();
 };
 const showConfirm = async (message) => {
-    const modal = new _services_modal__WEBPACK_IMPORTED_MODULE_0__.ModalProvider({
-        title: "Confirmation",
-        body: message,
-        type: "confirm"
-    });
+    const modal = new _services_modal_confirm__WEBPACK_IMPORTED_MODULE_1__.ConfirmModal({ title: "Confirmation", body: message });
     const result = await modal.show();
     return result;
 };
-const showPrompt = async (message, defaultValue = "") => {
-    const modal = new _services_modal__WEBPACK_IMPORTED_MODULE_0__.ModalProvider({
-        title: message,
-        body: message,
-        type: "prompt",
-        inputValue: defaultValue
-    });
+const showPrompt = async (message, defaultInput = "") => {
+    const modal = new _services_modal_prompt__WEBPACK_IMPORTED_MODULE_2__.PromptModal({ title: "Prompt", body: message, defaultInput });
     const result = await modal.show();
     return result;
 };
