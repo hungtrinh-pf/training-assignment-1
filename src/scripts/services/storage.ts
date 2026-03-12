@@ -100,7 +100,7 @@ export const dataStorage = {
         return files[fileIndex];
     },
 
-    deleteFile: (folderId: string, fileId: string): boolean => {
+    deleteFile: (fileId: string): boolean => {
         const files = loadFiles();
         const newFiles = files.filter((f) => f.id !== fileId);
         if (newFiles.length === files.length) return false;

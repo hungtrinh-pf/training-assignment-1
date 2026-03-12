@@ -205,18 +205,16 @@ const createFileRow = (file: FileItem) => {
       modifiedBy: "You",
     };
 
-    const folderId = getCurrentFolderId();
     dataStorage.updateFile(file.id, newFile);
-    renderGrid(folderId);
+    renderGrid(getCurrentFolderId());
   });
 
   row.querySelector(".delete-file")?.addEventListener("click", (e) => {
     e.preventDefault();
     if (!confirm(`Delete file "${file.name}"?`)) return;
 
-    const folderId = getCurrentFolderId();
-    dataStorage.deleteFile(folderId, file.id);
-    renderGrid(folderId);
+    dataStorage.deleteFile(file.id);
+    renderGrid(getCurrentFolderId());
   });
 
   initRowSelection(row);

@@ -196,17 +196,15 @@ const createFileRow = (file) => {
             createdBy: "You",
             modifiedBy: "You",
         };
-        const folderId = (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_2__.getCurrentFolderId)();
         _services_storage__WEBPACK_IMPORTED_MODULE_1__.dataStorage.updateFile(file.id, newFile);
-        renderGrid(folderId);
+        renderGrid((0,_utilities_helper__WEBPACK_IMPORTED_MODULE_2__.getCurrentFolderId)());
     });
     row.querySelector(".delete-file")?.addEventListener("click", (e) => {
         e.preventDefault();
         if (!confirm(`Delete file "${file.name}"?`))
             return;
-        const folderId = (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_2__.getCurrentFolderId)();
-        _services_storage__WEBPACK_IMPORTED_MODULE_1__.dataStorage.deleteFile(folderId, file.id);
-        renderGrid(folderId);
+        _services_storage__WEBPACK_IMPORTED_MODULE_1__.dataStorage.deleteFile(file.id);
+        renderGrid((0,_utilities_helper__WEBPACK_IMPORTED_MODULE_2__.getCurrentFolderId)());
     });
     initRowSelection(row);
     return row;
@@ -403,7 +401,7 @@ const dataStorage = {
         saveFiles(files);
         return files[fileIndex];
     },
-    deleteFile: (folderId, fileId) => {
+    deleteFile: (fileId) => {
         const files = loadFiles();
         const newFiles = files.filter((f) => f.id !== fileId);
         if (newFiles.length === files.length)
