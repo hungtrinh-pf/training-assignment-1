@@ -1,5 +1,5 @@
 import renderGrid from '../components/_grid';
-import { folderStorage } from '../services/storage';
+import { dataStorage } from '../services/storage';
 import { ready } from '../utilities/_helper';
 import { getCurrentFolderId, hasInvalidChars } from '../utilities/_helper';
 
@@ -17,21 +17,19 @@ const createNewFolder = () => {
     return;
   }
 
-  folderStorage.createFolder({
+  dataStorage.createFolder({
     name: folderName.trim(),
-    files: [],
-    subFolders: [],
+    parentId: currentFolderId,
     createdBy: "You",
     modifiedBy: "You",
-  }, currentFolderId);
+  });
 
   renderCurrentFolder();
 };
 
 ready(() => {
-  const rootFolder = folderStorage.folders[0];
-  if (!rootFolder || rootFolder.subFolders.length + rootFolder.files.length === 0) {
-    folderStorage.seed();
+  if (dataStorage.folders.length + dataStorage.files.length === 0) {
+    dataStorage.seed();
   }
 
   renderCurrentFolder();
@@ -58,10 +56,11 @@ ready(() => {
       const fileMeta = {
         name: file.name,
         type: file.type,
+        folderId: currentFolderId,
         createdBy: "You",
         modifiedBy: "You",
       };
-      folderStorage.createFile(currentFolderId, fileMeta);
+      dataStorage.createFile(fileMeta);
     }
     renderCurrentFolder();
   });

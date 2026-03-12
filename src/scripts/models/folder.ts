@@ -1,10 +1,7 @@
-import { FileItem } from "./file";
-
 export interface FolderItem {
     id: string;
     name: string;
-    files: FileItem[];
-    subFolders: FolderItem[];
+    parentId: string;
     createdAt: number;
     createdBy: string;
     modifiedAt: number;
@@ -12,4 +9,7 @@ export interface FolderItem {
 };
 
 export type FolderCreateDto = Omit<FolderItem, 'id' | 'createdAt' | 'modifiedAt'>;
-export type FolderUpdateDto = Partial<Omit<FolderItem, 'id' | 'createdAt'>>;
+export type FolderUpdateDto = {
+    name: string;
+    modifiedBy: string;
+};

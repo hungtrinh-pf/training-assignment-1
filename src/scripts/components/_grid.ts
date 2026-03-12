@@ -1,7 +1,7 @@
 import { FILE_EXT_MAP } from "../constants";
 import { FileItem } from "../models/file";
 import { FolderItem } from "../models/folder";
-import { folderStorage } from "../services/storage";
+import { dataStorage } from "../services/storage";
 import { getCurrentFolderId, hasInvalidChars } from "../utilities/_helper";
 
 const delay = (ms = 250) => new Promise<void>(resolve => setTimeout(resolve, ms));
@@ -11,20 +11,16 @@ const showSpinner = () => spinner?.classList.remove("d-none");
 const hideSpinner = () => spinner?.classList.add("d-none");
 
 const getFolderPath = (folderId?: string): FolderItem[] => {
-  if (!folderId) return [];
   const path: FolderItem[] = [];
-  const walk = (folders: FolderItem[], parents: FolderItem[]): boolean => {
-    for (const f of folders) {
-      const nextParents = [...parents, f];
-      if (f.id === folderId) {
-        path.push(...nextParents);
-        return true;
-      }
-      if (walk(f.subFolders, nextParents)) return true;
-    }
-    return false;
-  };
-  walk(folderStorage.folders, []);
+  let currentId = folderId;
+
+  while (currentId) {
+    const folder = dataStorage.getFolderById(currentId);
+    if (!folder) break;
+    path.unshift(folder);
+    currentId = folder.parentId;
+  }
+
   return path;
 };
 
@@ -72,11 +68,11 @@ const renderGrid = async (folderId?: string) => {
   let folders: FolderItem[] = [];
   let files: FileItem[] = [];
 
-  const currentFolder = folderStorage.getFolderById(folderId ?? '');
+  const currentFolder = dataStorage.getFolderById(folderId ?? '');
   if (currentFolder) {
     h2.innerHTML = currentFolder.name;
-    folders = currentFolder.subFolders;
-    files = currentFolder.files;
+    folders = dataStorage.folders.filter(folder => folder.parentId === currentFolder.id);
+    files = dataStorage.files.filter(file => file.folderId === currentFolder.id);
   } else if (folderId && !currentFolder) {
     h2.innerHTML = "Folder not found";
   }
@@ -149,7 +145,7 @@ const createFolderRow = (folder: FolderItem) => {
       return;
     }
 
-    folderStorage.updateFolder(folder.id, {
+    dataStorage.updateFolder(folder.id, {
       name: newName.trim(),
       modifiedBy: "You",
     });
@@ -160,7 +156,7 @@ const createFolderRow = (folder: FolderItem) => {
     e.preventDefault();
     if (!confirm(`Delete folder "${folder.name}"?`)) return;
 
-    folderStorage.deleteFolder(folder.id);
+    dataStorage.deleteFolder(folder.id);
     renderGrid(currentFolderId);
   });
 
@@ -210,7 +206,7 @@ const createFileRow = (file: FileItem) => {
     };
 
     const folderId = getCurrentFolderId();
-    folderStorage.updateFile(folderId, file.id, newFile);
+    dataStorage.updateFile(file.id, newFile);
     renderGrid(folderId);
   });
 
@@ -219,7 +215,7 @@ const createFileRow = (file: FileItem) => {
     if (!confirm(`Delete file "${file.name}"?`)) return;
 
     const folderId = getCurrentFolderId();
-    folderStorage.deleteFile(folderId, file.id);
+    dataStorage.deleteFile(folderId, file.id);
     renderGrid(folderId);
   });
 

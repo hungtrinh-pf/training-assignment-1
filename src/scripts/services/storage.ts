@@ -1,19 +1,15 @@
-import { FOLDER_STORAGE_KEY, SEED_DATA } from "../constants";
-import { FileCreateUpdateDto, FileItem } from "../models/file";
-import { FolderItem, FolderCreateDto, FolderUpdateDto } from "../models/folder";
+import { FILE_STORAGE_KEY, FOLDER_STORAGE_KEY, SEED_FILES, SEED_FOLDERS } from "../constants";
+import { FileCreateDto, FileItem, FileUpdateDto } from "../models/file";
+import { FolderCreateDto, FolderItem, FolderUpdateDto } from "../models/folder";
+import { generateId, safeParse } from "../utilities/_storage";
 
-const safeParse = <T>(value: string | null, fallback: T): T => {
-    if (!value) return fallback;
-    try {
-        return JSON.parse(value) as T;
-    } catch {
-        return fallback;
-    }
+const loadFiles = (): FileItem[] => {
+    return safeParse<FileItem[]>(localStorage.getItem(FILE_STORAGE_KEY), []);
 };
 
-const generateId = () => {
-    return crypto.randomUUID();
-};
+const saveFiles = (files: FileItem[]) => {
+    localStorage.setItem(FILE_STORAGE_KEY, JSON.stringify(files));
+}
 
 const loadFolders = (): FolderItem[] => {
     return safeParse<FolderItem[]>(localStorage.getItem(FOLDER_STORAGE_KEY), []);
@@ -23,157 +19,92 @@ const saveFolders = (folders: FolderItem[]) => {
     localStorage.setItem(FOLDER_STORAGE_KEY, JSON.stringify(folders));
 };
 
-const walkFolders = (
-    folders: FolderItem[],
-    fn: (folder: FolderItem, parentArray: FolderItem[], index: number) => boolean
-): boolean => {
-    for (let i = 0; i < folders.length; i++) {
-        const folder = folders[i];
-        if (fn(folder, folders, i)) return true;
-        if (walkFolders(folder.subFolders, fn)) return true;
-    }
-    return false;
-};
-
-export const folderStorage = {
+export const dataStorage = {
+    get files(): FileItem[] { return loadFiles(); },
     get folders(): FolderItem[] { return loadFolders(); },
 
-    seed: () => saveFolders([SEED_DATA]),
+    seed: () => {
+        saveFiles(SEED_FILES);
+        saveFolders(SEED_FOLDERS);
+    },
 
     getFolderById: (folderId: string): FolderItem | undefined => {
         const folders = loadFolders();
-        const stack = [...folders];
-        while (stack.length) {
-            const current = stack.pop();
-            if (current?.id === folderId) return current;
-            if (current) stack.push(...current.subFolders);
-        }
-        return undefined;
+        return folders.find((folder) => folder.id === folderId);
     },
 
-    createFolder: (data: FolderCreateDto, parentId?: string): FolderItem | undefined => {
+    createFolder: (data: FolderCreateDto): FolderItem | undefined => {
         const folders = loadFolders();
-        let createdFolder;
+        const subFolders = folders.filter((folder) => folder.parentId === data.parentId);
 
-        walkFolders(folders, (folder) => {
-            if (folder.id !== parentId) return false;
-            if (folder.subFolders.some(folder => folder.name === data.name)) {
-                alert(`A folder with name "${data.name}" already exists.`);
-                return true;
-            }
+        if (subFolders.some((folder) => folder.name === data.name)) {
+            alert(`A folder with name "${data.name}" already exists.`);
+            return;
+        }
 
-            const newFolder: FolderItem = {
-                id: generateId(),
-                createdAt: Date.now(),
-                modifiedAt: Date.now(),
-                ...data,
-            };
-
-            folder.subFolders.push(newFolder);
-            folder.modifiedAt = Date.now();
-            createdFolder = newFolder;
-            return true;
-        });
-
-        if (createdFolder) saveFolders(folders);
-        return createdFolder;
+        const newFolder: FolderItem = {
+            id: generateId(),
+            createdAt: Date.now(),
+            modifiedAt: Date.now(),
+            ...data,
+        };
+        folders.push(newFolder);
+        saveFolders(folders);
+        return newFolder;
     },
 
     updateFolder: (folderId: string, data: FolderUpdateDto): FolderItem | undefined => {
         const folders = loadFolders();
-        let updatedFolder;
+        const folderToUpdate = folders.find((folder) => folder.id === folderId);
+        if (!folderToUpdate) return;
 
-        walkFolders(folders, (folder, parentArray) => {
-            if (folder.id !== folderId) return false;
-            if (parentArray.some(folder => folder.name === data.name)) {
-                alert(`A folder with name "${data.name}" already exists.`);
-                return true;
-            }
+        const parentArray = folders.filter((folder) => folder.parentId === folderToUpdate.parentId);
+        if (parentArray.some((folder) => folder.name === data.name)) {
+            alert(`A folder with name "${data.name}" already exists.`);
+            return;
+        }
 
-            Object.assign(folder, data, { modifiedAt: Date.now() });
-            updatedFolder = folder;
-            return true;
-        });
-
-        if (updatedFolder) saveFolders(folders);
-        return updatedFolder;
+        Object.assign(folderToUpdate, data, { modifiedAt: Date.now() });
+        saveFolders(folders);
+        return folderToUpdate;
     },
 
     deleteFolder: (folderId: string): boolean => {
         const folders = loadFolders();
-        let deleted = false;
-
-        walkFolders(folders, (_, parentArray, index) => {
-            if (parentArray[index].id !== folderId) return false;
-            parentArray.splice(index, 1);
-            deleted = true;
-            return true;
-        });
-
-        if (deleted) saveFolders(folders);
-        return deleted;
+        const newFolders = folders.filter((folder) => folder.id !== folderId);
+        if (newFolders.length === folders.length) return false;
+        saveFolders(newFolders);
+        return true;
     },
 
-    createFile: (folderId: string, data: FileCreateUpdateDto): FileItem | undefined => {
-        const folders = loadFolders();
-        let createdFile;
-
-        walkFolders(folders, (folder) => {
-            if (folder.id !== folderId) return false;
-
-            const newFile: FileItem = {
-                ...data,
-                id: generateId(),
-                createdAt: Date.now(),
-                modifiedAt: Date.now(),
-            };
-            folder.files.push(newFile);
-            folder.modifiedAt = Date.now();
-            createdFile = newFile;
-            return true;
-        });
-
-        if (createdFile) saveFolders(folders);
-        return createdFile;
+    createFile: (data: FileCreateDto): FileItem | undefined => {
+        const files = loadFiles();
+        const newFile: FileItem = {
+            ...data,
+            id: generateId(),
+            createdAt: Date.now(),
+            modifiedAt: Date.now(),
+        };
+        files.push(newFile);
+        saveFiles(files);
+        return newFile;
     },
 
-    updateFile: (folderId: string, fileId: string, data: FileCreateUpdateDto): FileItem | undefined => {
-        const folders = loadFolders();
-        let updatedFile;
+    updateFile: (fileId: string, data: FileUpdateDto): FileItem | undefined => {
+        const files = loadFiles();
+        const fileIndex = files.findIndex((f) => f.id === fileId);
+        if (fileIndex === -1) return;
 
-        walkFolders(folders, (folder) => {
-            if (folder.id !== folderId) return false;
-
-            const fileIndex = folder.files.findIndex(f => f.id === fileId);
-            if (fileIndex === -1) return false;
-
-            folder.files[fileIndex] = { ...folder.files[fileIndex], ...data, modifiedAt: Date.now() };
-            folder.modifiedAt = Date.now();
-            updatedFile = folder.files[fileIndex];
-            return true;
-        });
-
-        if (updatedFile) saveFolders(folders);
-        return updatedFile;
+        files[fileIndex] = { ...files[fileIndex], ...data, modifiedAt: Date.now() };
+        saveFiles(files);
+        return files[fileIndex];
     },
 
     deleteFile: (folderId: string, fileId: string): boolean => {
-        const folders = loadFolders();
-        let deleted = false;
-
-        walkFolders(folders, (folder) => {
-            if (folder.id !== folderId) return false;
-
-            const newFiles = folder.files.filter(f => f.id !== fileId);
-            if (newFiles.length === folder.files.length) return false;
-
-            folder.files = newFiles;
-            folder.modifiedAt = Date.now();
-            deleted = true;
-            return true;
-        });
-
-        if (deleted) saveFolders(folders);
-        return deleted;
+        const files = loadFiles();
+        const newFiles = files.filter((f) => f.id !== fileId);
+        if (newFiles.length === files.length) return false;
+        saveFiles(newFiles);
+        return true;
     },
 };
