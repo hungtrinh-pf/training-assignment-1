@@ -7541,11 +7541,11 @@ const createFolderRow = (folder) => {
     `;
     row.querySelector(".rename-folder")?.addEventListener("click", async (e) => {
         e.preventDefault();
-        const newName = await (0,_utilities_modal__WEBPACK_IMPORTED_MODULE_3__.showPrompt)("Rename folder", folder.name);
+        const newName = await (0,_utilities_modal__WEBPACK_IMPORTED_MODULE_3__.showPrompt)("New name:", folder.name, "Rename folder");
         if (typeof newName !== "string" || !newName.trim())
             return;
         if ((0,_utilities_helper__WEBPACK_IMPORTED_MODULE_2__.hasInvalidChars)(newName)) {
-            (0,_utilities_modal__WEBPACK_IMPORTED_MODULE_3__.showAlert)("Error: Folder name contains an invalid character: \\ / : * ? \" < > |");
+            (0,_utilities_modal__WEBPACK_IMPORTED_MODULE_3__.showAlert)("Folder name contains an invalid character: \\ / : * ? \" < > |", "Error");
             return;
         }
         _services_storage__WEBPACK_IMPORTED_MODULE_1__.dataStorage.updateFolder(folder.id, {
@@ -7589,11 +7589,11 @@ const createFileRow = (file) => {
     `;
     row.querySelector(".rename-file")?.addEventListener("click", async (e) => {
         e.preventDefault();
-        const newName = await (0,_utilities_modal__WEBPACK_IMPORTED_MODULE_3__.showPrompt)("Rename file", file.name);
+        const newName = await (0,_utilities_modal__WEBPACK_IMPORTED_MODULE_3__.showPrompt)("New name:", file.name, "Rename file");
         if (typeof newName !== "string" || !newName.trim())
             return;
         if ((0,_utilities_helper__WEBPACK_IMPORTED_MODULE_2__.hasInvalidChars)(newName)) {
-            (0,_utilities_modal__WEBPACK_IMPORTED_MODULE_3__.showAlert)("Error: File name contains an invalid character: \\ / : * ? \" < > |");
+            (0,_utilities_modal__WEBPACK_IMPORTED_MODULE_3__.showAlert)("File name contains an invalid character: \\ / : * ? \" < > |", "Error");
             return;
         }
         const newFile = {
@@ -7935,7 +7935,7 @@ const dataStorage = {
         const folders = loadFolders();
         const subFolders = folders.filter((folder) => folder.parentId === data.parentId);
         if (subFolders.some((folder) => folder.name === data.name)) {
-            (0,_utilities_modal__WEBPACK_IMPORTED_MODULE_1__.showAlert)(`A folder with name "${data.name}" already exists.`);
+            (0,_utilities_modal__WEBPACK_IMPORTED_MODULE_1__.showAlert)(`A folder with name "${data.name}" already exists.`, "Error");
             return;
         }
         const newFolder = {
@@ -7955,7 +7955,7 @@ const dataStorage = {
             return;
         const parentArray = folders.filter((folder) => folder.parentId === folderToUpdate.parentId);
         if (parentArray.some((folder) => folder.name === data.name)) {
-            (0,_utilities_modal__WEBPACK_IMPORTED_MODULE_1__.showAlert)(`A folder with name "${data.name}" already exists.`);
+            (0,_utilities_modal__WEBPACK_IMPORTED_MODULE_1__.showAlert)(`A folder with name "${data.name}" already exists.`, "Error");
             return;
         }
         Object.assign(folderToUpdate, data, { modifiedAt: Date.now() });
@@ -8068,17 +8068,17 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-const showAlert = (message) => {
-    const modal = new _services_modal_alert__WEBPACK_IMPORTED_MODULE_0__.AlertModal({ title: "Alert", body: message });
+const showAlert = (message, title = "Alert") => {
+    const modal = new _services_modal_alert__WEBPACK_IMPORTED_MODULE_0__.AlertModal({ title, body: message });
     modal.show();
 };
-const showConfirm = async (message) => {
-    const modal = new _services_modal_confirm__WEBPACK_IMPORTED_MODULE_1__.ConfirmModal({ title: "Confirmation", body: message });
+const showConfirm = async (message, title = "Confirmation") => {
+    const modal = new _services_modal_confirm__WEBPACK_IMPORTED_MODULE_1__.ConfirmModal({ title, body: message });
     const result = await modal.show();
     return result;
 };
-const showPrompt = async (message, defaultInput = "") => {
-    const modal = new _services_modal_prompt__WEBPACK_IMPORTED_MODULE_2__.PromptModal({ title: "Prompt", body: message, defaultInput });
+const showPrompt = async (message, defaultInput = "", title = "Prompt") => {
+    const modal = new _services_modal_prompt__WEBPACK_IMPORTED_MODULE_2__.PromptModal({ title, body: message, defaultInput });
     const result = await modal.show();
     return result;
 };
@@ -8198,11 +8198,11 @@ const renderCurrentFolder = () => {
 };
 const createNewFolder = async () => {
     const currentFolderId = (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_2__.getCurrentFolderId)();
-    const folderName = await (0,_utilities_modal__WEBPACK_IMPORTED_MODULE_3__.showPrompt)("Folder name", "New folder");
+    const folderName = await (0,_utilities_modal__WEBPACK_IMPORTED_MODULE_3__.showPrompt)("Folder name", "New folder", "New folder");
     if (typeof folderName !== "string" || !folderName.trim())
         return;
     if ((0,_utilities_helper__WEBPACK_IMPORTED_MODULE_2__.hasInvalidChars)(folderName)) {
-        (0,_utilities_modal__WEBPACK_IMPORTED_MODULE_3__.showAlert)("Error: Folder name contains an invalid character: \\ / : * ? \" < > |");
+        (0,_utilities_modal__WEBPACK_IMPORTED_MODULE_3__.showAlert)("Folder name contains an invalid character: \\ / : * ? \" < > |", "Error");
         return;
     }
     _services_storage__WEBPACK_IMPORTED_MODULE_1__.dataStorage.createFolder({

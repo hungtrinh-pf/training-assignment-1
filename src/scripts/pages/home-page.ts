@@ -11,10 +11,10 @@ const renderCurrentFolder = () => {
 const createNewFolder = async () => {
   const currentFolderId = getCurrentFolderId();
 
-  const folderName = await showPrompt("Folder name", "New folder");
+  const folderName = await showPrompt("Folder name", "New folder", "New folder");
   if (typeof folderName !== "string" || !folderName.trim()) return;
   if (hasInvalidChars(folderName)) {
-    showAlert("Error: Folder name contains an invalid character: \\ / : * ? \" < > |");
+    showAlert("Folder name contains an invalid character: \\ / : * ? \" < > |", "Error");
     return;
   }
 

@@ -39,7 +39,7 @@ export const dataStorage = {
     const subFolders = folders.filter((folder) => folder.parentId === data.parentId);
 
     if (subFolders.some((folder) => folder.name === data.name)) {
-      showAlert(`A folder with name "${data.name}" already exists.`);
+      showAlert(`A folder with name "${data.name}" already exists.`, "Error");
       return;
     }
 
@@ -61,7 +61,7 @@ export const dataStorage = {
 
     const parentArray = folders.filter((folder) => folder.parentId === folderToUpdate.parentId);
     if (parentArray.some((folder) => folder.name === data.name)) {
-      showAlert(`A folder with name "${data.name}" already exists.`);
+      showAlert(`A folder with name "${data.name}" already exists.`, "Error");
       return;
     }
 

@@ -139,10 +139,10 @@ const createFolderRow = (folder: FolderItem) => {
 
   row.querySelector(".rename-folder")?.addEventListener("click", async (e) => {
     e.preventDefault();
-    const newName = await showPrompt("Rename folder", folder.name);
+    const newName = await showPrompt("New name:", folder.name, "Rename folder");
     if (typeof newName !== "string" || !newName.trim()) return;
     if (hasInvalidChars(newName)) {
-      showAlert("Error: Folder name contains an invalid character: \\ / : * ? \" < > |");
+      showAlert("Folder name contains an invalid character: \\ / : * ? \" < > |", "Error");
       return;
     }
 
@@ -192,10 +192,10 @@ const createFileRow = (file: FileItem) => {
 
   row.querySelector(".rename-file")?.addEventListener("click", async (e) => {
     e.preventDefault();
-    const newName = await showPrompt("Rename file", file.name);
+    const newName = await showPrompt("New name:", file.name, "Rename file");
     if (typeof newName !== "string" || !newName.trim()) return;
     if (hasInvalidChars(newName)) {
-      showAlert("Error: File name contains an invalid character: \\ / : * ? \" < > |");
+      showAlert("File name contains an invalid character: \\ / : * ? \" < > |", "Error");
       return;
     }
 
