@@ -7729,20 +7729,20 @@ class AlertModal extends _base__WEBPACK_IMPORTED_MODULE_0__.BaseModal {
     show() {
         return new Promise(resolve => {
             this.createModal(`
-                <div class="modal fade" id="${this.id}" tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header"><h5 class="modal-title">${this.title}</h5></div>
-                            <div class="modal-body">
-                                <div>${this.body}</div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-primary" data-action="ok">OK</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `);
+        <div class="modal fade" id="${this.id}" tabindex="-1" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header"><h5 class="modal-title">${this.title}</h5></div>
+              <div class="modal-body">
+                <div>${this.body}</div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-action="ok">OK</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `);
             const okBtn = this.modalElement.querySelector('[data-action="ok"]');
             this.modalElement.addEventListener("hidden.bs.modal", () => this.disposeModal(), { once: true });
             okBtn.addEventListener("click", () => { resolve(true); this.modal.hide(); }, { once: true });
@@ -7814,21 +7814,21 @@ class ConfirmModal extends _base__WEBPACK_IMPORTED_MODULE_0__.BaseModal {
     show() {
         return new Promise(resolve => {
             this.createModal(`
-                <div class="modal fade" id="${this.id}" tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header"><h5 class="modal-title">${this.title}</h5></div>
-                            <div class="modal-body">
-                                <div>${this.body}</div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-primary" data-action="ok">OK</button>
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-action="cancel">Cancel</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `);
+        <div class="modal fade" id="${this.id}" tabindex="-1" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header"><h5 class="modal-title">${this.title}</h5></div>
+              <div class="modal-body">
+                <div>${this.body}</div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-action="ok">OK</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-action="cancel">Cancel</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `);
             const okBtn = this.modalElement.querySelector('[data-action="ok"]');
             const cancelBtn = this.modalElement.querySelector('[data-action="cancel"]');
             this.modalElement.addEventListener("hidden.bs.modal", () => this.disposeModal(), { once: true });
@@ -7862,22 +7862,22 @@ class PromptModal extends _base__WEBPACK_IMPORTED_MODULE_0__.BaseModal {
     show() {
         return new Promise(resolve => {
             this.createModal(`
-                <div class="modal fade" id="${this.id}" tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header"><h5 class="modal-title">${this.title}</h5></div>
-                            <div class="modal-body">
-                                <div>${this.body}</div>
-                                <input class="form-control mt-2" value="${this.defaultInput}">
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-primary" data-action="ok">OK</button>
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-action="cancel">Cancel</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `);
+        <div class="modal fade" id="${this.id}" tabindex="-1" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header"><h5 class="modal-title">${this.title}</h5></div>
+              <div class="modal-body">
+                <div>${this.body}</div>
+                <input class="form-control mt-2" value="${this.defaultInput}">
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-action="ok">OK</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-action="cancel">Cancel</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `);
             const okBtn = this.modalElement.querySelector('[data-action="ok"]');
             const cancelBtn = this.modalElement.querySelector('[data-action="cancel"]');
             const inputEl = this.modalElement.querySelector('input');
@@ -7964,10 +7964,24 @@ const dataStorage = {
     },
     deleteFolder: (folderId) => {
         const folders = loadFolders();
-        const newFolders = folders.filter((folder) => folder.id !== folderId);
+        const files = loadFiles();
+        const getDescendantFolders = (id, allFolders) => {
+            const directChildren = allFolders.filter(f => f.parentId === id);
+            let ids = directChildren.map(f => f.id);
+            for (const child of directChildren) {
+                ids = ids.concat(getDescendantFolders(child.id, allFolders));
+            }
+            return ids;
+        };
+        const descendantIds = getDescendantFolders(folderId, folders);
+        const foldersToDelete = [folderId, ...descendantIds];
+        const newFolders = folders.filter(folder => !foldersToDelete.includes(folder.id));
         if (newFolders.length === folders.length)
             return false;
+        // Remove files in those folders
+        const newFiles = files.filter(file => !foldersToDelete.includes(file.folderId));
         saveFolders(newFolders);
+        saveFiles(newFiles);
         return true;
     },
     createFile: (data) => {

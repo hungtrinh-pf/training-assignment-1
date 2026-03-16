@@ -72,9 +72,28 @@ export const dataStorage = {
 
   deleteFolder: (folderId: string): boolean => {
     const folders = loadFolders();
-    const newFolders = folders.filter((folder) => folder.id !== folderId);
+    const files = loadFiles();
+
+    const getDescendantFolders = (id: string, allFolders: FolderItem[]): string[] => {
+      const directChildren = allFolders.filter(f => f.parentId === id);
+      let ids = directChildren.map(f => f.id);
+      for (const child of directChildren) {
+        ids = ids.concat(getDescendantFolders(child.id, allFolders));
+      }
+      return ids;
+    };
+
+    const descendantIds = getDescendantFolders(folderId, folders);
+    const foldersToDelete = [folderId, ...descendantIds];
+
+    const newFolders = folders.filter(folder => !foldersToDelete.includes(folder.id));
     if (newFolders.length === folders.length) return false;
+
+    // Remove files in those folders
+    const newFiles = files.filter(file => !foldersToDelete.includes(file.folderId));
+
     saveFolders(newFolders);
+    saveFiles(newFiles);
     return true;
   },
 
