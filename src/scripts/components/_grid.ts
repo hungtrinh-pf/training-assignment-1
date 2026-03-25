@@ -1,4 +1,4 @@
-import { FILE_EXT_MAP } from "../constants";
+import { FILE_ENDPOINT, FILE_EXT_MAP } from "../constants";
 import { FileItem } from "../models/file";
 import { FolderItem } from "../models/folder";
 import { dataStorage } from "../services/storage";
@@ -11,12 +11,12 @@ const spinner = document.getElementById("loading-spinner");
 const showSpinner = () => spinner?.classList.remove("d-none");
 const hideSpinner = () => spinner?.classList.add("d-none");
 
-const getFolderPath = (folderId?: string): FolderItem[] => {
+const getFolderPath = async (folderId?: string) => {
   const path: FolderItem[] = [];
   let currentId = folderId;
 
   while (currentId) {
-    const folder = dataStorage.getFolderById(currentId);
+    const folder = await dataStorage.getFolderById(currentId);
     if (!folder) break;
     path.unshift(folder);
     currentId = folder.parentId;
@@ -25,7 +25,7 @@ const getFolderPath = (folderId?: string): FolderItem[] => {
   return path;
 };
 
-const renderBreadcrumb = (folderId?: string) => {
+const renderBreadcrumb = async (folderId?: string) => {
   const breadcrumb = document.querySelector<HTMLOListElement>('.breadcrumb');
   if (folderId === "root") {
     breadcrumb.style.display = "none";
@@ -34,7 +34,7 @@ const renderBreadcrumb = (folderId?: string) => {
 
   breadcrumb.style.display = "";
   breadcrumb.innerHTML = `<li class="breadcrumb-item"><a href="#">Documents</a></li>`;
-  const folderPath = getFolderPath(folderId);
+  const folderPath = await getFolderPath(folderId);
   for (const folder of folderPath) {
     if (folder.id === folderId) {
       breadcrumb.innerHTML += `
@@ -69,11 +69,15 @@ const renderGrid = async (folderId?: string) => {
   let folders: FolderItem[] = [];
   let files: FileItem[] = [];
 
-  const currentFolder = dataStorage.getFolderById(folderId ?? '');
+  const allFolders = await dataStorage.getFolders();
+  const allFiles = await dataStorage.getFiles();
+
+  const currentFolder = await dataStorage.getFolderById(folderId ?? 'root');
+
   if (currentFolder) {
     h2.innerHTML = currentFolder.name;
-    folders = dataStorage.folders.filter(folder => folder.parentId === currentFolder.id);
-    files = dataStorage.files.filter(file => file.folderId === currentFolder.id);
+    folders = allFolders.filter(folder => folder.parentId === folderId);
+    files = allFiles.filter(file => file.folderId === folderId);
   } else if (folderId && !currentFolder) {
     h2.innerHTML = "Folder not found";
   }
@@ -146,10 +150,15 @@ const createFolderRow = (folder: FolderItem) => {
       return;
     }
 
-    dataStorage.updateFolder(folder.id, {
+    const errorMsg = await dataStorage.updateFolder(folder.id, {
       name: newName.trim(),
       modifiedBy: "You",
     });
+    if (errorMsg) {
+      showAlert(errorMsg, "Error");
+      return;
+    }
+
     renderGrid(currentFolderId);
   });
 
@@ -157,7 +166,12 @@ const createFolderRow = (folder: FolderItem) => {
     e.preventDefault();
     if (!(await showConfirm(`Delete folder "${folder.name}"?`))) return;
 
-    dataStorage.deleteFolder(folder.id);
+    const errorMsg = await dataStorage.deleteFolder(folder.id);
+    if (errorMsg) {
+      showAlert(errorMsg, "Error");
+      return;
+    }
+    
     renderGrid(currentFolderId);
   });
 
@@ -184,11 +198,33 @@ const createFileRow = (file: FileItem) => {
       <td></td>
       <td>
         <div class="row-actions" style="visibility: hidden;">
+          <a href="#" class="download-file me-2"><i class="ms-Icon ms-Icon--Download"></i></a>
           <a href="#" class="rename-file me-2"><i class="ms-Icon ms-Icon--Edit"></i></a>
           <a href="#" class="delete-file"><i class="ms-Icon ms-Icon--Delete"></i></a>
         </div>
       </td>
     `;
+
+  row.querySelector(".download-file")?.addEventListener("click", async (e) => {
+    e.preventDefault();
+
+    fetch(`${FILE_ENDPOINT}/${file.id}`)
+      .then(res => res.ok ? res.blob() : Promise.reject("Cannot download file"))
+      .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+
+        const a = document.createElement("a");
+        a.style.display = "none";
+        a.href = url;
+        a.download = file.name,
+
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        a.remove();
+      })
+      .catch((msg) => showAlert(msg, "Error"));
+  });
 
   row.querySelector(".rename-file")?.addEventListener("click", async (e) => {
     e.preventDefault();

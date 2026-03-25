@@ -2,9 +2,9 @@ export interface FolderItem {
   id: string;
   name: string;
   parentId: string;
-  createdAt: number;
+  createdAt: string;
   createdBy: string;
-  modifiedAt: number;
+  modifiedAt: string;
   modifiedBy: string;
 };
 

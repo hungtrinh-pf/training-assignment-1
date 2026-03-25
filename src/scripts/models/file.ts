@@ -7,7 +7,17 @@ export interface FileItem {
   createdBy: string;
   modifiedAt: number;
   modifiedBy: string;
+  content: File;
 };
 
-export type FileCreateDto = Omit<FileItem, 'id' | 'createdAt' | 'modifiedAt'>;
-export type FileUpdateDto = Omit<FileCreateDto, 'folderId'>;
+export interface FileCreateDto {
+  folderId: string;
+  createdBy: string;
+  modifiedBy: string;
+  content: File;
+};
+
+export interface FileUpdateDto {
+  name: string;
+  modifiedBy: string;
+};

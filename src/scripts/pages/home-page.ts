@@ -18,21 +18,21 @@ const createNewFolder = async () => {
     return;
   }
 
-  dataStorage.createFolder({
+  const errorMsg = await dataStorage.createFolder({
     name: folderName.trim(),
     parentId: currentFolderId,
     createdBy: "You",
     modifiedBy: "You",
   });
+  if (errorMsg) {
+    showAlert(errorMsg, "Error");
+    return;
+  }
 
   renderCurrentFolder();
 };
 
 ready(() => {
-  if (dataStorage.folders.length + dataStorage.files.length === 0) {
-    dataStorage.seed();
-  }
-
   renderCurrentFolder();
   window.addEventListener("hashchange", renderCurrentFolder);
 
@@ -48,20 +48,19 @@ ready(() => {
     e.preventDefault();
     uploadInput?.click();
   });
-  uploadInput?.addEventListener("change", (e) => {
+  uploadInput?.addEventListener("change", async (e) => {
     const files = (e.target as HTMLInputElement).files;
     if (files.length === 0) return;
 
     const currentFolderId = getCurrentFolderId();
     for (const file of files) {
       const fileMeta = {
-        name: file.name,
-        type: file.type,
         folderId: currentFolderId,
         createdBy: "You",
         modifiedBy: "You",
+        content: file,
       };
-      dataStorage.createFile(fileMeta);
+      await dataStorage.createFile(fileMeta);
     }
     renderCurrentFolder();
   });

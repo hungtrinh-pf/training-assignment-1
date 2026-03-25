@@ -1,130 +1,62 @@
-import { FILE_STORAGE_KEY, FOLDER_STORAGE_KEY, SEED_FILES, SEED_FOLDERS } from "../constants";
+import { FILE_ENDPOINT, FOLDER_ENDPOINT } from "../constants";
 import { FileCreateDto, FileItem, FileUpdateDto } from "../models/file";
 import { FolderCreateDto, FolderItem, FolderUpdateDto } from "../models/folder";
-import { showAlert } from "../utilities/_modal";
-import { generateId, safeParse } from "../utilities/_storage";
-
-const loadFiles = (): FileItem[] => {
-  return safeParse<FileItem[]>(localStorage.getItem(FILE_STORAGE_KEY), []);
-};
-
-const saveFiles = (files: FileItem[]) => {
-  localStorage.setItem(FILE_STORAGE_KEY, JSON.stringify(files));
-}
-
-const loadFolders = (): FolderItem[] => {
-  return safeParse<FolderItem[]>(localStorage.getItem(FOLDER_STORAGE_KEY), []);
-};
-
-const saveFolders = (folders: FolderItem[]) => {
-  localStorage.setItem(FOLDER_STORAGE_KEY, JSON.stringify(folders));
-};
+import { fetchJson, fetchNoData } from "../utilities/_storage";
 
 export const dataStorage = {
-  get files(): FileItem[] { return loadFiles(); },
-  get folders(): FolderItem[] { return loadFolders(); },
+  getFiles: async () => await fetchJson(FILE_ENDPOINT) as FileItem[],
+  getFolders: async () => await fetchJson(FOLDER_ENDPOINT) as FolderItem[],
 
-  seed: () => {
-    saveFiles(SEED_FILES);
-    saveFolders(SEED_FOLDERS);
+  getFolderById: async (folderId: string) => {
+    return await fetchJson(`${FOLDER_ENDPOINT}?id=${folderId}`) as FolderItem;
   },
 
-  getFolderById: (folderId: string): FolderItem | undefined => {
-    const folders = loadFolders();
-    return folders.find((folder) => folder.id === folderId);
+  createFolder: async (data: FolderCreateDto) => {
+    return await fetchNoData(FOLDER_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data)
+    });
   },
 
-  createFolder: (data: FolderCreateDto): FolderItem | undefined => {
-    const folders = loadFolders();
-    const subFolders = folders.filter((folder) => folder.parentId === data.parentId);
-
-    if (subFolders.some((folder) => folder.name === data.name)) {
-      showAlert(`A folder with name "${data.name}" already exists.`, "Error");
-      return;
-    }
-
-    const newFolder: FolderItem = {
-      id: generateId(),
-      createdAt: Date.now(),
-      modifiedAt: Date.now(),
-      ...data,
-    };
-    folders.push(newFolder);
-    saveFolders(folders);
-    return newFolder;
+  updateFolder: async (folderId: string, data: FolderUpdateDto) => {
+    return await fetchNoData(`${FOLDER_ENDPOINT}?id=${folderId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data)
+    });
   },
 
-  updateFolder: (folderId: string, data: FolderUpdateDto): FolderItem | undefined => {
-    const folders = loadFolders();
-    const folderToUpdate = folders.find((folder) => folder.id === folderId);
-    if (!folderToUpdate) return;
-
-    const parentArray = folders.filter((folder) => folder.parentId === folderToUpdate.parentId);
-    if (parentArray.some((folder) => folder.name === data.name)) {
-      showAlert(`A folder with name "${data.name}" already exists.`, "Error");
-      return;
-    }
-
-    Object.assign(folderToUpdate, data, { modifiedAt: Date.now() });
-    saveFolders(folders);
-    return folderToUpdate;
+  deleteFolder: async (folderId: string) => {
+    return await fetchNoData(`${FOLDER_ENDPOINT}?id=${folderId}`, { method: "DELETE" });
   },
 
-  deleteFolder: (folderId: string): boolean => {
-    const folders = loadFolders();
-    const files = loadFiles();
+  createFile: async (data: FileCreateDto) => {
+    const uploadForm = new FormData();
 
-    const getDescendantFolders = (id: string, allFolders: FolderItem[]): string[] => {
-      const directChildren = allFolders.filter(f => f.parentId === id);
-      let ids = directChildren.map(f => f.id);
-      for (const child of directChildren) {
-        ids = ids.concat(getDescendantFolders(child.id, allFolders));
-      }
-      return ids;
-    };
+    uploadForm.append("folderId", data.folderId);
+    uploadForm.append("createdBy", data.createdBy);
+    uploadForm.append("modifiedBy", data.modifiedBy);
+    uploadForm.append("file", data.content);
 
-    const descendantIds = getDescendantFolders(folderId, folders);
-    const foldersToDelete = [folderId, ...descendantIds];
-
-    const newFolders = folders.filter(folder => !foldersToDelete.includes(folder.id));
-    if (newFolders.length === folders.length) return false;
-
-    // Remove files in those folders
-    const newFiles = files.filter(file => !foldersToDelete.includes(file.folderId));
-
-    saveFolders(newFolders);
-    saveFiles(newFiles);
-    return true;
+    return await fetchNoData(FILE_ENDPOINT, { method: "POST", body: uploadForm });
   },
 
-  createFile: (data: FileCreateDto): FileItem | undefined => {
-    const files = loadFiles();
-    const newFile: FileItem = {
-      ...data,
-      id: generateId(),
-      createdAt: Date.now(),
-      modifiedAt: Date.now(),
-    };
-    files.push(newFile);
-    saveFiles(files);
-    return newFile;
+  updateFile: async (fileId: string, data: FileUpdateDto) => {
+    return await fetchNoData(`${FILE_ENDPOINT}?id=${fileId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data)
+    });
   },
 
-  updateFile: (fileId: string, data: FileUpdateDto): FileItem | undefined => {
-    const files = loadFiles();
-    const fileIndex = files.findIndex((f) => f.id === fileId);
-    if (fileIndex === -1) return;
-
-    files[fileIndex] = { ...files[fileIndex], ...data, modifiedAt: Date.now() };
-    saveFiles(files);
-    return files[fileIndex];
-  },
-
-  deleteFile: (fileId: string): boolean => {
-    const files = loadFiles();
-    const newFiles = files.filter((f) => f.id !== fileId);
-    if (newFiles.length === files.length) return false;
-    saveFiles(newFiles);
-    return true;
+  deleteFile: async (fileId: string) => {
+    return await fetchNoData(`${FILE_ENDPOINT}?id=${fileId}`, { method: "DELETE" });
   },
 };

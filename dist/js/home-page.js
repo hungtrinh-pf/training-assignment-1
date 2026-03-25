@@ -7425,11 +7425,11 @@ const delay = (ms = 250) => new Promise(resolve => setTimeout(resolve, ms));
 const spinner = document.getElementById("loading-spinner");
 const showSpinner = () => spinner?.classList.remove("d-none");
 const hideSpinner = () => spinner?.classList.add("d-none");
-const getFolderPath = (folderId) => {
+const getFolderPath = async (folderId) => {
     const path = [];
     let currentId = folderId;
     while (currentId) {
-        const folder = _services_storage__WEBPACK_IMPORTED_MODULE_1__.dataStorage.getFolderById(currentId);
+        const folder = await _services_storage__WEBPACK_IMPORTED_MODULE_1__.dataStorage.getFolderById(currentId);
         if (!folder)
             break;
         path.unshift(folder);
@@ -7437,7 +7437,7 @@ const getFolderPath = (folderId) => {
     }
     return path;
 };
-const renderBreadcrumb = (folderId) => {
+const renderBreadcrumb = async (folderId) => {
     const breadcrumb = document.querySelector('.breadcrumb');
     if (folderId === "root") {
         breadcrumb.style.display = "none";
@@ -7445,7 +7445,7 @@ const renderBreadcrumb = (folderId) => {
     }
     breadcrumb.style.display = "";
     breadcrumb.innerHTML = `<li class="breadcrumb-item"><a href="#">Documents</a></li>`;
-    const folderPath = getFolderPath(folderId);
+    const folderPath = await getFolderPath(folderId);
     for (const folder of folderPath) {
         if (folder.id === folderId) {
             breadcrumb.innerHTML += `
@@ -7478,11 +7478,13 @@ const renderGrid = async (folderId) => {
     renderBreadcrumb(folderId);
     let folders = [];
     let files = [];
-    const currentFolder = _services_storage__WEBPACK_IMPORTED_MODULE_1__.dataStorage.getFolderById(folderId ?? '');
+    const allFolders = await _services_storage__WEBPACK_IMPORTED_MODULE_1__.dataStorage.getFolders();
+    const allFiles = await _services_storage__WEBPACK_IMPORTED_MODULE_1__.dataStorage.getFiles();
+    const currentFolder = await _services_storage__WEBPACK_IMPORTED_MODULE_1__.dataStorage.getFolderById(folderId ?? 'root');
     if (currentFolder) {
         h2.innerHTML = currentFolder.name;
-        folders = _services_storage__WEBPACK_IMPORTED_MODULE_1__.dataStorage.folders.filter(folder => folder.parentId === currentFolder.id);
-        files = _services_storage__WEBPACK_IMPORTED_MODULE_1__.dataStorage.files.filter(file => file.folderId === currentFolder.id);
+        folders = allFolders.filter(folder => folder.parentId === folderId);
+        files = allFiles.filter(file => file.folderId === folderId);
     }
     else if (folderId && !currentFolder) {
         h2.innerHTML = "Folder not found";
@@ -7548,17 +7550,25 @@ const createFolderRow = (folder) => {
             (0,_utilities_modal__WEBPACK_IMPORTED_MODULE_3__.showAlert)("Folder name contains an invalid character: \\ / : * ? \" < > |", "Error");
             return;
         }
-        _services_storage__WEBPACK_IMPORTED_MODULE_1__.dataStorage.updateFolder(folder.id, {
+        const errorMsg = await _services_storage__WEBPACK_IMPORTED_MODULE_1__.dataStorage.updateFolder(folder.id, {
             name: newName.trim(),
             modifiedBy: "You",
         });
+        if (errorMsg) {
+            (0,_utilities_modal__WEBPACK_IMPORTED_MODULE_3__.showAlert)(errorMsg, "Error");
+            return;
+        }
         renderGrid(currentFolderId);
     });
     row.querySelector(".delete-folder")?.addEventListener("click", async (e) => {
         e.preventDefault();
         if (!(await (0,_utilities_modal__WEBPACK_IMPORTED_MODULE_3__.showConfirm)(`Delete folder "${folder.name}"?`)))
             return;
-        _services_storage__WEBPACK_IMPORTED_MODULE_1__.dataStorage.deleteFolder(folder.id);
+        const errorMsg = await _services_storage__WEBPACK_IMPORTED_MODULE_1__.dataStorage.deleteFolder(folder.id);
+        if (errorMsg) {
+            (0,_utilities_modal__WEBPACK_IMPORTED_MODULE_3__.showAlert)(errorMsg, "Error");
+            return;
+        }
         renderGrid(currentFolderId);
     });
     initRowSelection(row);
@@ -7582,11 +7592,29 @@ const createFileRow = (file) => {
       <td></td>
       <td>
         <div class="row-actions" style="visibility: hidden;">
+          <a href="#" class="download-file me-2"><i class="ms-Icon ms-Icon--Download"></i></a>
           <a href="#" class="rename-file me-2"><i class="ms-Icon ms-Icon--Edit"></i></a>
           <a href="#" class="delete-file"><i class="ms-Icon ms-Icon--Delete"></i></a>
         </div>
       </td>
     `;
+    row.querySelector(".download-file")?.addEventListener("click", async (e) => {
+        e.preventDefault();
+        fetch(`${_constants__WEBPACK_IMPORTED_MODULE_0__.FILE_ENDPOINT}/${file.id}`)
+            .then(res => res.ok ? res.blob() : Promise.reject("Cannot download file"))
+            .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.style.display = "none";
+            a.href = url;
+            a.download = file.name,
+                document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            a.remove();
+        })
+            .catch((msg) => (0,_utilities_modal__WEBPACK_IMPORTED_MODULE_3__.showAlert)(msg, "Error"));
+    });
     row.querySelector(".rename-file")?.addEventListener("click", async (e) => {
         e.preventDefault();
         const newName = await (0,_utilities_modal__WEBPACK_IMPORTED_MODULE_3__.showPrompt)("New name:", file.name, "Rename file");
@@ -7628,76 +7656,12 @@ const createFileRow = (file) => {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   FILE_ENDPOINT: function() { return /* binding */ FILE_ENDPOINT; },
 /* harmony export */   FILE_EXT_MAP: function() { return /* binding */ FILE_EXT_MAP; },
-/* harmony export */   FILE_STORAGE_KEY: function() { return /* binding */ FILE_STORAGE_KEY; },
-/* harmony export */   FOLDER_STORAGE_KEY: function() { return /* binding */ FOLDER_STORAGE_KEY; },
-/* harmony export */   SEED_FILES: function() { return /* binding */ SEED_FILES; },
-/* harmony export */   SEED_FOLDERS: function() { return /* binding */ SEED_FOLDERS; }
+/* harmony export */   FOLDER_ENDPOINT: function() { return /* binding */ FOLDER_ENDPOINT; }
 /* harmony export */ });
-const FOLDER_STORAGE_KEY = "trainingAssignment1.folderData";
-const FILE_STORAGE_KEY = "trainingAssignment1.fileData";
-const SEED_FOLDERS = [
-    {
-        id: "root",
-        name: "Documents",
-        parentId: "",
-        createdAt: Date.now(),
-        createdBy: "You",
-        modifiedAt: Date.now(),
-        modifiedBy: "You"
-    },
-    {
-        id: crypto.randomUUID(),
-        name: "CAS",
-        parentId: "root",
-        createdAt: 1745995351000,
-        createdBy: "Megan Bowen",
-        modifiedAt: 1745995351000,
-        modifiedBy: "Megan Bowen",
-    },
-];
-const SEED_FILES = [
-    {
-        id: crypto.randomUUID(),
-        name: "CoasterAndBargeLoading.xlsx",
-        type: "excel",
-        folderId: "root",
-        createdAt: Date.now(),
-        createdBy: "Administrator MOD",
-        modifiedAt: Date.now(),
-        modifiedBy: "Administrator MOD",
-    },
-    {
-        id: crypto.randomUUID(),
-        name: "RevenueByServices.xlsx",
-        type: "excel",
-        folderId: "root",
-        createdAt: Date.now(),
-        createdBy: "Administrator MOD",
-        modifiedAt: Date.now(),
-        modifiedBy: "Administrator MOD",
-    },
-    {
-        id: crypto.randomUUID(),
-        name: "RevenueByServices2016.xlsx",
-        type: "excel",
-        folderId: "root",
-        createdAt: Date.now(),
-        createdBy: "Administrator MOD",
-        modifiedAt: Date.now(),
-        modifiedBy: "Administrator MOD",
-    },
-    {
-        id: crypto.randomUUID(),
-        name: "RevenueByServices2017.xlsx",
-        type: "excel",
-        folderId: "root",
-        createdAt: Date.now(),
-        createdBy: "Administrator MOD",
-        modifiedAt: Date.now(),
-        modifiedBy: "Administrator MOD",
-    },
-];
+const FOLDER_ENDPOINT = "https://localhost:7277/api/folder";
+const FILE_ENDPOINT = "https://localhost:7277/api/file";
 const FILE_EXT_MAP = {
     xlsx: "excel.svg",
     docx: "word.svg",
@@ -7903,115 +7867,55 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   dataStorage: function() { return /* binding */ dataStorage; }
 /* harmony export */ });
 /* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../constants */ "./src/scripts/constants/index.ts");
-/* harmony import */ var _utilities_modal__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utilities/_modal */ "./src/scripts/utilities/_modal.ts");
-/* harmony import */ var _utilities_storage__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../utilities/_storage */ "./src/scripts/utilities/_storage.ts");
+/* harmony import */ var _utilities_storage__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utilities/_storage */ "./src/scripts/utilities/_storage.ts");
 
 
-
-const loadFiles = () => {
-    return (0,_utilities_storage__WEBPACK_IMPORTED_MODULE_2__.safeParse)(localStorage.getItem(_constants__WEBPACK_IMPORTED_MODULE_0__.FILE_STORAGE_KEY), []);
-};
-const saveFiles = (files) => {
-    localStorage.setItem(_constants__WEBPACK_IMPORTED_MODULE_0__.FILE_STORAGE_KEY, JSON.stringify(files));
-};
-const loadFolders = () => {
-    return (0,_utilities_storage__WEBPACK_IMPORTED_MODULE_2__.safeParse)(localStorage.getItem(_constants__WEBPACK_IMPORTED_MODULE_0__.FOLDER_STORAGE_KEY), []);
-};
-const saveFolders = (folders) => {
-    localStorage.setItem(_constants__WEBPACK_IMPORTED_MODULE_0__.FOLDER_STORAGE_KEY, JSON.stringify(folders));
-};
 const dataStorage = {
-    get files() { return loadFiles(); },
-    get folders() { return loadFolders(); },
-    seed: () => {
-        saveFiles(_constants__WEBPACK_IMPORTED_MODULE_0__.SEED_FILES);
-        saveFolders(_constants__WEBPACK_IMPORTED_MODULE_0__.SEED_FOLDERS);
+    getFiles: async () => await (0,_utilities_storage__WEBPACK_IMPORTED_MODULE_1__.fetchJson)(_constants__WEBPACK_IMPORTED_MODULE_0__.FILE_ENDPOINT),
+    getFolders: async () => await (0,_utilities_storage__WEBPACK_IMPORTED_MODULE_1__.fetchJson)(_constants__WEBPACK_IMPORTED_MODULE_0__.FOLDER_ENDPOINT),
+    getFolderById: async (folderId) => {
+        return await (0,_utilities_storage__WEBPACK_IMPORTED_MODULE_1__.fetchJson)(`${_constants__WEBPACK_IMPORTED_MODULE_0__.FOLDER_ENDPOINT}?id=${folderId}`);
     },
-    getFolderById: (folderId) => {
-        const folders = loadFolders();
-        return folders.find((folder) => folder.id === folderId);
+    createFolder: async (data) => {
+        return await (0,_utilities_storage__WEBPACK_IMPORTED_MODULE_1__.fetchNoData)(_constants__WEBPACK_IMPORTED_MODULE_0__.FOLDER_ENDPOINT, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+        });
     },
-    createFolder: (data) => {
-        const folders = loadFolders();
-        const subFolders = folders.filter((folder) => folder.parentId === data.parentId);
-        if (subFolders.some((folder) => folder.name === data.name)) {
-            (0,_utilities_modal__WEBPACK_IMPORTED_MODULE_1__.showAlert)(`A folder with name "${data.name}" already exists.`, "Error");
-            return;
-        }
-        const newFolder = {
-            id: (0,_utilities_storage__WEBPACK_IMPORTED_MODULE_2__.generateId)(),
-            createdAt: Date.now(),
-            modifiedAt: Date.now(),
-            ...data,
-        };
-        folders.push(newFolder);
-        saveFolders(folders);
-        return newFolder;
+    updateFolder: async (folderId, data) => {
+        return await (0,_utilities_storage__WEBPACK_IMPORTED_MODULE_1__.fetchNoData)(`${_constants__WEBPACK_IMPORTED_MODULE_0__.FOLDER_ENDPOINT}?id=${folderId}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+        });
     },
-    updateFolder: (folderId, data) => {
-        const folders = loadFolders();
-        const folderToUpdate = folders.find((folder) => folder.id === folderId);
-        if (!folderToUpdate)
-            return;
-        const parentArray = folders.filter((folder) => folder.parentId === folderToUpdate.parentId);
-        if (parentArray.some((folder) => folder.name === data.name)) {
-            (0,_utilities_modal__WEBPACK_IMPORTED_MODULE_1__.showAlert)(`A folder with name "${data.name}" already exists.`, "Error");
-            return;
-        }
-        Object.assign(folderToUpdate, data, { modifiedAt: Date.now() });
-        saveFolders(folders);
-        return folderToUpdate;
+    deleteFolder: async (folderId) => {
+        return await (0,_utilities_storage__WEBPACK_IMPORTED_MODULE_1__.fetchNoData)(`${_constants__WEBPACK_IMPORTED_MODULE_0__.FOLDER_ENDPOINT}?id=${folderId}`, { method: "DELETE" });
     },
-    deleteFolder: (folderId) => {
-        const folders = loadFolders();
-        const files = loadFiles();
-        const getDescendantFolders = (id, allFolders) => {
-            const directChildren = allFolders.filter(f => f.parentId === id);
-            let ids = directChildren.map(f => f.id);
-            for (const child of directChildren) {
-                ids = ids.concat(getDescendantFolders(child.id, allFolders));
-            }
-            return ids;
-        };
-        const descendantIds = getDescendantFolders(folderId, folders);
-        const foldersToDelete = [folderId, ...descendantIds];
-        const newFolders = folders.filter(folder => !foldersToDelete.includes(folder.id));
-        if (newFolders.length === folders.length)
-            return false;
-        // Remove files in those folders
-        const newFiles = files.filter(file => !foldersToDelete.includes(file.folderId));
-        saveFolders(newFolders);
-        saveFiles(newFiles);
-        return true;
+    createFile: async (data) => {
+        const uploadForm = new FormData();
+        uploadForm.append("folderId", data.folderId);
+        uploadForm.append("createdBy", data.createdBy);
+        uploadForm.append("modifiedBy", data.modifiedBy);
+        uploadForm.append("file", data.content);
+        return await (0,_utilities_storage__WEBPACK_IMPORTED_MODULE_1__.fetchNoData)(_constants__WEBPACK_IMPORTED_MODULE_0__.FILE_ENDPOINT, { method: "POST", body: uploadForm });
     },
-    createFile: (data) => {
-        const files = loadFiles();
-        const newFile = {
-            ...data,
-            id: (0,_utilities_storage__WEBPACK_IMPORTED_MODULE_2__.generateId)(),
-            createdAt: Date.now(),
-            modifiedAt: Date.now(),
-        };
-        files.push(newFile);
-        saveFiles(files);
-        return newFile;
+    updateFile: async (fileId, data) => {
+        return await (0,_utilities_storage__WEBPACK_IMPORTED_MODULE_1__.fetchNoData)(`${_constants__WEBPACK_IMPORTED_MODULE_0__.FILE_ENDPOINT}?id=${fileId}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+        });
     },
-    updateFile: (fileId, data) => {
-        const files = loadFiles();
-        const fileIndex = files.findIndex((f) => f.id === fileId);
-        if (fileIndex === -1)
-            return;
-        files[fileIndex] = { ...files[fileIndex], ...data, modifiedAt: Date.now() };
-        saveFiles(files);
-        return files[fileIndex];
-    },
-    deleteFile: (fileId) => {
-        const files = loadFiles();
-        const newFiles = files.filter((f) => f.id !== fileId);
-        if (newFiles.length === files.length)
-            return false;
-        saveFiles(newFiles);
-        return true;
+    deleteFile: async (fileId) => {
+        return await (0,_utilities_storage__WEBPACK_IMPORTED_MODULE_1__.fetchNoData)(`${_constants__WEBPACK_IMPORTED_MODULE_0__.FILE_ENDPOINT}?id=${fileId}`, { method: "DELETE" });
     },
 };
 
@@ -8094,7 +7998,8 @@ const showPrompt = async (message, defaultInput = "", title = "Prompt") => {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   generateId: function() { return /* binding */ generateId; },
+/* harmony export */   fetchJson: function() { return /* binding */ fetchJson; },
+/* harmony export */   fetchNoData: function() { return /* binding */ fetchNoData; },
 /* harmony export */   safeParse: function() { return /* binding */ safeParse; }
 /* harmony export */ });
 const safeParse = (value, fallback) => {
@@ -8107,8 +8012,17 @@ const safeParse = (value, fallback) => {
         return fallback;
     }
 };
-const generateId = () => {
-    return crypto.randomUUID();
+const fetchJson = async (url, options) => {
+    const response = await fetch(url, options);
+    const responseObj = await response.json();
+    return responseObj.data;
+};
+const fetchNoData = async (url, options) => {
+    const response = await fetch(url, options);
+    if (!response.ok) {
+        const errorObject = await response.json();
+        return errorObject.message;
+    }
 };
 
 
@@ -8205,18 +8119,19 @@ const createNewFolder = async () => {
         (0,_utilities_modal__WEBPACK_IMPORTED_MODULE_3__.showAlert)("Folder name contains an invalid character: \\ / : * ? \" < > |", "Error");
         return;
     }
-    _services_storage__WEBPACK_IMPORTED_MODULE_1__.dataStorage.createFolder({
+    const errorMsg = await _services_storage__WEBPACK_IMPORTED_MODULE_1__.dataStorage.createFolder({
         name: folderName.trim(),
         parentId: currentFolderId,
         createdBy: "You",
         modifiedBy: "You",
     });
+    if (errorMsg) {
+        (0,_utilities_modal__WEBPACK_IMPORTED_MODULE_3__.showAlert)(errorMsg, "Error");
+        return;
+    }
     renderCurrentFolder();
 };
 (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_2__.ready)(() => {
-    if (_services_storage__WEBPACK_IMPORTED_MODULE_1__.dataStorage.folders.length + _services_storage__WEBPACK_IMPORTED_MODULE_1__.dataStorage.files.length === 0) {
-        _services_storage__WEBPACK_IMPORTED_MODULE_1__.dataStorage.seed();
-    }
     renderCurrentFolder();
     window.addEventListener("hashchange", renderCurrentFolder);
     const newButton = document.querySelector("#button-new");
@@ -8230,20 +8145,19 @@ const createNewFolder = async () => {
         e.preventDefault();
         uploadInput?.click();
     });
-    uploadInput?.addEventListener("change", (e) => {
+    uploadInput?.addEventListener("change", async (e) => {
         const files = e.target.files;
         if (files.length === 0)
             return;
         const currentFolderId = (0,_utilities_helper__WEBPACK_IMPORTED_MODULE_2__.getCurrentFolderId)();
         for (const file of files) {
             const fileMeta = {
-                name: file.name,
-                type: file.type,
                 folderId: currentFolderId,
                 createdBy: "You",
                 modifiedBy: "You",
+                content: file,
             };
-            _services_storage__WEBPACK_IMPORTED_MODULE_1__.dataStorage.createFile(fileMeta);
+            await _services_storage__WEBPACK_IMPORTED_MODULE_1__.dataStorage.createFile(fileMeta);
         }
         renderCurrentFolder();
     });
