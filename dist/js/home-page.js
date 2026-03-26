@@ -7905,10 +7905,8 @@ __webpack_require__.r(__webpack_exports__);
 
 
 const dataStorage = {
-    getFiles: async () => await (0,_utilities_storage__WEBPACK_IMPORTED_MODULE_1__.fetchJson)(_constants__WEBPACK_IMPORTED_MODULE_0__.FILE_ENDPOINT),
-    getFolders: async () => await (0,_utilities_storage__WEBPACK_IMPORTED_MODULE_1__.fetchJson)(_constants__WEBPACK_IMPORTED_MODULE_0__.FOLDER_ENDPOINT),
     getFolderById: async (folderId) => {
-        return await (0,_utilities_storage__WEBPACK_IMPORTED_MODULE_1__.fetchJson)(`${_constants__WEBPACK_IMPORTED_MODULE_0__.FOLDER_ENDPOINT}?id=${folderId}`);
+        return await (0,_utilities_storage__WEBPACK_IMPORTED_MODULE_1__.fetchJson)(`${_constants__WEBPACK_IMPORTED_MODULE_0__.FOLDER_ENDPOINT}/${folderId}`);
     },
     createFolder: async (data) => {
         return await (0,_utilities_storage__WEBPACK_IMPORTED_MODULE_1__.fetchNoData)(_constants__WEBPACK_IMPORTED_MODULE_0__.FOLDER_ENDPOINT, {
@@ -7920,7 +7918,7 @@ const dataStorage = {
         });
     },
     updateFolder: async (folderId, data) => {
-        return await (0,_utilities_storage__WEBPACK_IMPORTED_MODULE_1__.fetchNoData)(`${_constants__WEBPACK_IMPORTED_MODULE_0__.FOLDER_ENDPOINT}?id=${folderId}`, {
+        return await (0,_utilities_storage__WEBPACK_IMPORTED_MODULE_1__.fetchNoData)(`${_constants__WEBPACK_IMPORTED_MODULE_0__.FOLDER_ENDPOINT}/${folderId}`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json"
@@ -7929,7 +7927,7 @@ const dataStorage = {
         });
     },
     deleteFolder: async (folderId) => {
-        return await (0,_utilities_storage__WEBPACK_IMPORTED_MODULE_1__.fetchNoData)(`${_constants__WEBPACK_IMPORTED_MODULE_0__.FOLDER_ENDPOINT}?id=${folderId}`, { method: "DELETE" });
+        return await (0,_utilities_storage__WEBPACK_IMPORTED_MODULE_1__.fetchNoData)(`${_constants__WEBPACK_IMPORTED_MODULE_0__.FOLDER_ENDPOINT}/${folderId}`, { method: "DELETE" });
     },
     createFile: async (data) => {
         const uploadForm = new FormData();
@@ -7940,7 +7938,7 @@ const dataStorage = {
         return await (0,_utilities_storage__WEBPACK_IMPORTED_MODULE_1__.fetchNoData)(_constants__WEBPACK_IMPORTED_MODULE_0__.FILE_ENDPOINT, { method: "POST", body: uploadForm });
     },
     updateFile: async (fileId, data) => {
-        return await (0,_utilities_storage__WEBPACK_IMPORTED_MODULE_1__.fetchNoData)(`${_constants__WEBPACK_IMPORTED_MODULE_0__.FILE_ENDPOINT}?id=${fileId}`, {
+        return await (0,_utilities_storage__WEBPACK_IMPORTED_MODULE_1__.fetchNoData)(`${_constants__WEBPACK_IMPORTED_MODULE_0__.FILE_ENDPOINT}/${fileId}`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json"
@@ -7949,7 +7947,7 @@ const dataStorage = {
         });
     },
     deleteFile: async (fileId) => {
-        return await (0,_utilities_storage__WEBPACK_IMPORTED_MODULE_1__.fetchNoData)(`${_constants__WEBPACK_IMPORTED_MODULE_0__.FILE_ENDPOINT}?id=${fileId}`, { method: "DELETE" });
+        return await (0,_utilities_storage__WEBPACK_IMPORTED_MODULE_1__.fetchNoData)(`${_constants__WEBPACK_IMPORTED_MODULE_0__.FILE_ENDPOINT}/${fileId}`, { method: "DELETE" });
     },
 };
 

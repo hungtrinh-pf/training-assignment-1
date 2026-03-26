@@ -1,14 +1,11 @@
 import { FILE_ENDPOINT, FOLDER_ENDPOINT } from "../constants";
-import { FileCreateDto, FileItem, FileUpdateDto } from "../models/file";
+import { FileCreateDto, FileUpdateDto } from "../models/file";
 import { FolderCreateDto, FolderItem, FolderUpdateDto } from "../models/folder";
 import { fetchJson, fetchNoData } from "../utilities/_storage";
 
 export const dataStorage = {
-  getFiles: async () => await fetchJson(FILE_ENDPOINT) as FileItem[],
-  getFolders: async () => await fetchJson(FOLDER_ENDPOINT) as FolderItem[],
-
   getFolderById: async (folderId: string) => {
-    return await fetchJson(`${FOLDER_ENDPOINT}?id=${folderId}`) as FolderItem;
+    return await fetchJson(`${FOLDER_ENDPOINT}/${folderId}`) as FolderItem;
   },
 
   createFolder: async (data: FolderCreateDto) => {
@@ -22,7 +19,7 @@ export const dataStorage = {
   },
 
   updateFolder: async (folderId: string, data: FolderUpdateDto) => {
-    return await fetchNoData(`${FOLDER_ENDPOINT}?id=${folderId}`, {
+    return await fetchNoData(`${FOLDER_ENDPOINT}/${folderId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json"
@@ -32,7 +29,7 @@ export const dataStorage = {
   },
 
   deleteFolder: async (folderId: string) => {
-    return await fetchNoData(`${FOLDER_ENDPOINT}?id=${folderId}`, { method: "DELETE" });
+    return await fetchNoData(`${FOLDER_ENDPOINT}/${folderId}`, { method: "DELETE" });
   },
 
   createFile: async (data: FileCreateDto) => {
@@ -47,7 +44,7 @@ export const dataStorage = {
   },
 
   updateFile: async (fileId: string, data: FileUpdateDto) => {
-    return await fetchNoData(`${FILE_ENDPOINT}?id=${fileId}`, {
+    return await fetchNoData(`${FILE_ENDPOINT}/${fileId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json"
@@ -57,6 +54,6 @@ export const dataStorage = {
   },
 
   deleteFile: async (fileId: string) => {
-    return await fetchNoData(`${FILE_ENDPOINT}?id=${fileId}`, { method: "DELETE" });
+    return await fetchNoData(`${FILE_ENDPOINT}/${fileId}`, { method: "DELETE" });
   },
 };
