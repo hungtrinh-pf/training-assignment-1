@@ -7,7 +7,7 @@
     "jsx": "react",
     "allowJs": true,
     "esModuleInterop": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "sourceMap": true,
     "strict": false
   },

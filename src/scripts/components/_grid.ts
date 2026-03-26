@@ -1,6 +1,7 @@
 import { FILE_ENDPOINT, FILE_EXT_MAP } from "../constants";
 import { FileItem } from "../models/file";
 import { FolderItem } from "../models/folder";
+import { auth } from "../services/auth";
 import { dataStorage } from "../services/storage";
 import { getCurrentFolderId, hasInvalidChars } from "../utilities/_helper";
 import { showAlert, showConfirm, showPrompt } from "../utilities/_modal";
@@ -33,7 +34,8 @@ const renderBreadcrumb = async (folderId?: string) => {
   }
 
   breadcrumb.style.display = "";
-  breadcrumb.innerHTML = `<li class="breadcrumb-item"><a href="#">Documents</a></li>`;
+  breadcrumb.innerHTML = `<li class="breadcrumb-item"><a href="">Documents</a></li>`;
+
   const folderPath = await getFolderPath(folderId);
   for (const folder of folderPath) {
     if (folder.id === folderId) {
@@ -53,6 +55,12 @@ const renderBreadcrumb = async (folderId?: string) => {
 };
 
 const renderGrid = async (folderId?: string) => {
+  if (auth.isAuthenticated()) {
+    document.getElementById("logout-btn").classList.toggle("d-none");
+    document.getElementById("login-btn").classList.toggle("d-none");
+    document.getElementById("acc-name").innerText = auth.getUsername();
+  }
+
   const tbody = document.querySelector('table.table tbody');
   if (!tbody) return;
 
@@ -69,15 +77,12 @@ const renderGrid = async (folderId?: string) => {
   let folders: FolderItem[] = [];
   let files: FileItem[] = [];
 
-  const allFolders = await dataStorage.getFolders();
-  const allFiles = await dataStorage.getFiles();
-
   const currentFolder = await dataStorage.getFolderById(folderId ?? 'root');
 
   if (currentFolder) {
     h2.innerHTML = currentFolder.name;
-    folders = allFolders.filter(folder => folder.parentId === folderId);
-    files = allFiles.filter(file => file.folderId === folderId);
+    folders = currentFolder.subfolders;
+    files = currentFolder.files;
   } else if (folderId && !currentFolder) {
     h2.innerHTML = "Folder not found";
   }
@@ -135,8 +140,8 @@ const createFolderRow = (folder: FolderItem) => {
       <td></td>
       <td>
         <div class="row-actions" style="visibility: hidden;">
-          <a href="#" class="rename-folder me-2"><i class="ms-Icon ms-Icon--Edit"></i></a>
-          <a href="#" class="delete-folder"><i class="ms-Icon ms-Icon--Delete"></i></a>
+          <a href="" class="rename-folder me-2"><i class="ms-Icon ms-Icon--Edit"></i></a>
+          <a href="" class="delete-folder"><i class="ms-Icon ms-Icon--Delete"></i></a>
         </div>
       </td>
     `;
@@ -150,14 +155,10 @@ const createFolderRow = (folder: FolderItem) => {
       return;
     }
 
-    const errorMsg = await dataStorage.updateFolder(folder.id, {
+    dataStorage.updateFolder(folder.id, {
       name: newName.trim(),
-      modifiedBy: "You",
-    });
-    if (errorMsg) {
-      showAlert(errorMsg, "Error");
-      return;
-    }
+      modifiedBy: auth.getUsername(),
+    }).catch(error => showAlert(error, "Error"));
 
     renderGrid(currentFolderId);
   });
@@ -166,12 +167,7 @@ const createFolderRow = (folder: FolderItem) => {
     e.preventDefault();
     if (!(await showConfirm(`Delete folder "${folder.name}"?`))) return;
 
-    const errorMsg = await dataStorage.deleteFolder(folder.id);
-    if (errorMsg) {
-      showAlert(errorMsg, "Error");
-      return;
-    }
-    
+    dataStorage.deleteFolder(folder.id).catch(error => showAlert(error, "Error"));
     renderGrid(currentFolderId);
   });
 
@@ -198,9 +194,9 @@ const createFileRow = (file: FileItem) => {
       <td></td>
       <td>
         <div class="row-actions" style="visibility: hidden;">
-          <a href="#" class="download-file me-2"><i class="ms-Icon ms-Icon--Download"></i></a>
-          <a href="#" class="rename-file me-2"><i class="ms-Icon ms-Icon--Edit"></i></a>
-          <a href="#" class="delete-file"><i class="ms-Icon ms-Icon--Delete"></i></a>
+          <a href="" class="download-file me-2"><i class="ms-Icon ms-Icon--Download"></i></a>
+          <a href="" class="rename-file me-2"><i class="ms-Icon ms-Icon--Edit"></i></a>
+          <a href="" class="delete-file"><i class="ms-Icon ms-Icon--Delete"></i></a>
         </div>
       </td>
     `;
@@ -208,8 +204,11 @@ const createFileRow = (file: FileItem) => {
   row.querySelector(".download-file")?.addEventListener("click", async (e) => {
     e.preventDefault();
 
-    fetch(`${FILE_ENDPOINT}/${file.id}`)
-      .then(res => res.ok ? res.blob() : Promise.reject("Cannot download file"))
+    fetch(`${FILE_ENDPOINT}/${file.id}`, {
+      headers: {
+        "Authorization": `Bearer ${auth.getToken()}`
+      }
+    }).then(res => res.ok ? res.blob() : Promise.reject("Cannot download file"))
       .then(blob => {
         const url = window.URL.createObjectURL(blob);
 
@@ -238,8 +237,8 @@ const createFileRow = (file: FileItem) => {
     const newFile = {
       name: newName.trim(),
       type: file.type,
-      createdBy: "You",
-      modifiedBy: "You",
+      createdBy: auth.getUsername(),
+      modifiedBy: auth.getUsername(),
     };
 
     dataStorage.updateFile(file.id, newFile);

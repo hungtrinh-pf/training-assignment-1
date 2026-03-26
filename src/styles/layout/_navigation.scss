@@ -9,12 +9,14 @@
 
   .navbar-nav {
     gap: spacing(lg);
+    align-items: center;
 
     .nav-link {
       padding: 0;
       display: flex;
       align-items: flex-end;
       gap: spacing(sm);
+      cursor: pointer;
 
       img {
         width: $icon-width-navbar;
@@ -32,6 +34,13 @@
         font-size: font-size(sm);
       }
     }
+  }
+
+  #auth-container {
+    margin-left: auto;
+    display: flex;
+    gap: spacing(md);
+    align-items: center;
   }
 
   @media screen and (max-width: 576px) {

@@ -1,6 +1,8 @@
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const RemoveEmptyScriptsPlugin = require('webpack-remove-empty-scripts');
 const ESLintPlugin = require('eslint-webpack-plugin');
+const Dotenv = require('dotenv-webpack');
+
 const path = require('path');
 const { globSync } = require('glob');
 const LiveReloadPlugin = require('webpack-livereload-plugin');
@@ -122,6 +124,7 @@ const commonConfig = {
       fix: true,
     }),
     new webpack.ProgressPlugin(),
+    new Dotenv(),
   ],
 };
 

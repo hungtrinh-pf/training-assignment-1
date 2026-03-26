@@ -8,7 +8,7 @@ export class ConfirmModal extends BaseModal {
   show() {
     return new Promise(resolve => {
       this.createModal(`
-        <div class="modal fade" id="${this.id}" tabindex="-1" aria-hidden="true">
+        <div class="modal fade" id="${this.id}" tabindex="-1">
           <div class="modal-dialog">
             <div class="modal-content">
               <div class="modal-header"><h5 class="modal-title">${this.title}</h5></div>
