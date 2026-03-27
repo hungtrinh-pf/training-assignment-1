@@ -6,12 +6,6 @@ import { dataStorage } from "../services/storage";
 import { getCurrentFolderId, hasInvalidChars } from "../utilities/_helper";
 import { showAlert, showConfirm, showPrompt } from "../utilities/_modal";
 
-const delay = (ms = 250) => new Promise<void>(resolve => setTimeout(resolve, ms));
-
-const spinner = document.getElementById("loading-spinner");
-const showSpinner = () => spinner?.classList.remove("d-none");
-const hideSpinner = () => spinner?.classList.add("d-none");
-
 const getFolderPath = async (folderId?: string) => {
   const path: FolderItem[] = [];
   let currentId = folderId;
@@ -56,8 +50,8 @@ const renderBreadcrumb = async (folderId?: string) => {
 
 const renderGrid = async (folderId?: string) => {
   if (auth.isAuthenticated()) {
-    document.getElementById("logout-btn").classList.toggle("d-none");
-    document.getElementById("login-btn").classList.toggle("d-none");
+    document.getElementById("logout-btn").classList.remove("d-none");
+    document.getElementById("login-btn").classList.add("d-none");
     document.getElementById("acc-name").innerText = auth.getUsername();
   }
 
@@ -67,12 +61,7 @@ const renderGrid = async (folderId?: string) => {
   const h2 = document.querySelector('h2');
   if (!h2) return;
 
-  // Simulate loading delay
-  showSpinner();
   tbody.innerHTML = '';
-  await delay(500);
-  hideSpinner();
-
   renderBreadcrumb(folderId);
   let folders: FolderItem[] = [];
   let files: FileItem[] = [];

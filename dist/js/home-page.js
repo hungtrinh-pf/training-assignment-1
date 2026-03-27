@@ -7423,10 +7423,6 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-const delay = (ms = 250) => new Promise(resolve => setTimeout(resolve, ms));
-const spinner = document.getElementById("loading-spinner");
-const showSpinner = () => spinner?.classList.remove("d-none");
-const hideSpinner = () => spinner?.classList.add("d-none");
 const getFolderPath = async (folderId) => {
     const path = [];
     let currentId = folderId;
@@ -7467,8 +7463,8 @@ const renderBreadcrumb = async (folderId) => {
 };
 const renderGrid = async (folderId) => {
     if (_services_auth__WEBPACK_IMPORTED_MODULE_1__.auth.isAuthenticated()) {
-        document.getElementById("logout-btn").classList.toggle("d-none");
-        document.getElementById("login-btn").classList.toggle("d-none");
+        document.getElementById("logout-btn").classList.remove("d-none");
+        document.getElementById("login-btn").classList.add("d-none");
         document.getElementById("acc-name").innerText = _services_auth__WEBPACK_IMPORTED_MODULE_1__.auth.getUsername();
     }
     const tbody = document.querySelector('table.table tbody');
@@ -7477,11 +7473,7 @@ const renderGrid = async (folderId) => {
     const h2 = document.querySelector('h2');
     if (!h2)
         return;
-    // Simulate loading delay
-    showSpinner();
     tbody.innerHTML = '';
-    await delay(500);
-    hideSpinner();
     renderBreadcrumb(folderId);
     let folders = [];
     let files = [];
